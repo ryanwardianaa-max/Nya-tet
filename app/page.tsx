@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Wallet, Sparkles } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 
 export default function AuthPage() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -15,6 +15,14 @@ export default function AuthPage() {
   const [message, setMessage] = useState('');
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.push('/dashboard');
+      }
+    });
+  }, [router, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,42 +82,24 @@ export default function AuthPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-purple-500/10 blur-[100px] pointer-events-none" />
 
-      {/* Brand */}
-      <div className="text-center mb-10 relative z-10">
-        <div className="relative w-20 h-20 mx-auto mb-6 group cursor-default">
-          {/* Outer glow ring */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#0066cc] to-[#3399ff] rounded-[24px] blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
-          
-          {/* Main Logo Box */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#005bb5] via-[#007aff] to-[#3399ff] rounded-[24px] shadow-[0_8px_32px_rgba(0,102,204,0.4)] flex items-center justify-center overflow-hidden border border-white/20">
-            {/* Glass reflection */}
-            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent"></div>
-            
-            <Wallet size={36} color="white" strokeWidth={1.5} className="relative z-10 drop-shadow-md" />
-            
-            {/* Sparkle badge */}
-            <div className="absolute -top-1 -right-1 w-8 h-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-sm animate-pulse" style={{ animationDuration: '3s' }}>
-              <Sparkles size={14} className="text-white" />
-            </div>
+      {/* Header Logo (Top Left) */}
+      <div className="absolute top-0 left-0 w-full p-6 sm:p-8 flex items-center z-20">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-tr from-[#005bb5] to-[#3399ff] rounded-[12px] flex items-center justify-center shadow-md border border-white/20">
+            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent rounded-t-[12px]"></div>
+            <Wallet size={20} color="white" className="relative z-10" />
           </div>
+          <span className="font-extrabold tracking-tight text-[#1d1d1f] text-xl">Nya-tet</span>
         </div>
+      </div>
 
-        <h1
-          className="font-extrabold tracking-tight"
-          style={{ 
-            fontSize: '38px', 
-            lineHeight: '1.2', 
-            letterSpacing: '-0.04em',
-            background: 'linear-gradient(135deg, #1d1d1f 0%, #434345 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.05))'
-          }}
-        >
-          Nya-tet
+      {/* Welcome Text */}
+      <div className="text-center mb-8 relative z-10 mt-16 sm:mt-0">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1d1d1f] mb-3 tracking-tight">
+          Selamat Datang
         </h1>
-        <p className="mt-2 font-medium" style={{ color: '#7a7a7a', fontSize: '15px', letterSpacing: '-0.01em' }}>
-          Catat keuangan, <span className="text-[#0066cc] font-semibold">cukup bicara.</span>
+        <p className="text-[#7a7a7a] font-medium text-base">
+          Catat keuangan Anda, <span className="text-[#0066cc]">cukup bicara.</span>
         </p>
       </div>
 
