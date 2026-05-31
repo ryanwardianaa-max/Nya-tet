@@ -130,12 +130,39 @@ export default function LaporanPage() {
   };
 
   const handleShareWA = () => {
+    // Rangkum kategori
+    const categoryText = categoryData.map(c => `  • ${c.emoji} ${c.name}: ${formatRupiah(c.value)}`).join('\n');
+
+    // Rangkum transaksi per tanggal
+    const txByDate: Record<string, Transaction[]> = {};
+    filteredData.forEach(t => {
+      const date = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short' }).format(new Date(t.created_at));
+      if (!txByDate[date]) txByDate[date] = [];
+      txByDate[date].push(t);
+    });
+
+    let detailTx = '';
+    Object.keys(txByDate).slice(0, 10).forEach(date => { // Batasi 10 hari terakhir agar tidak terlalu panjang
+      detailTx += `\n📅 *${date}*\n`;
+      txByDate[date].forEach(t => {
+        const icon = t.tipe === 'pemasukan' ? '🟢' : '🔴';
+        const nominal = t.tipe === 'pemasukan' ? `+${formatRupiah(Number(t.jumlah))}` : `-${formatRupiah(Number(t.jumlah))}`;
+        detailTx += `${icon} ${t.keterangan || t.kategori} (${nominal})\n`;
+      });
+    });
+
     const text = `📊 *Laporan Keuangan Nya-tet* 📊
 Periode: ${periodeStr}
 
-📈 *Pemasukan*: ${formatRupiah(totalPemasukan)}
-📉 *Pengeluaran*: ${formatRupiah(totalPengeluaran)}
-💰 *Laba Bersih*: ${formatRupiah(saldo)}
+💰 *Ringkasan:*
+Pemasukan  : ${formatRupiah(totalPemasukan)}
+Pengeluaran: ${formatRupiah(totalPengeluaran)}
+*Laba Bersih : ${formatRupiah(saldo)}*
+
+📉 *Rincian Pengeluaran:*
+${categoryText || '  (Belum ada pengeluaran)'}
+
+📝 *Detail Transaksi Terbaru:*${detailTx}
 
 _Dibuat otomatis oleh Nya-tet App_ 🚀`;
 

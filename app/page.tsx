@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { Wallet } from 'lucide-react';
 
 export default function AuthPage() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -72,16 +73,10 @@ export default function AuthPage() {
       {/* Brand */}
       <div className="text-center mb-10">
         <div
-          className="w-14 h-14 rounded-[16px] flex items-center justify-center mx-auto mb-5"
-          style={{ background: '#0066cc' }}
+          className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20"
+          style={{ background: 'linear-gradient(135deg, #007aff 0%, #005bb5 100%)' }}
         >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
-            <path d="M8 7h6" />
-            <path d="M8 11h8" />
-            <path d="M8 15h6" />
-            <path d="M17.5 4.5l2 2-6.5 6.5-2 .5.5-2 6.5-6.5z" />
-          </svg>
+          <Wallet size={32} color="white" strokeWidth={1.5} />
         </div>
         <h1
           className="font-semibold tracking-tight text-[#1d1d1f]"

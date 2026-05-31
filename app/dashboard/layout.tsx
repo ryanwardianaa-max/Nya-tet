@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
-import { Home, PieChart, User, Plus, Mic, Camera, FileText, X } from 'lucide-react';
+import { LayoutGrid, Wallet, History, Settings, Plus, Mic, Camera, FileText, X } from 'lucide-react';
 import VoiceModal from '@/components/VoiceModal';
 import ScanModal from '@/components/ScanModal';
 import ManualModal from '@/components/ManualModal';
@@ -22,15 +22,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const handleTransactionSaved = (tx: Omit<Transaction, 'id' | 'user_id' | 'created_at'> & { created_at?: string }) => {
     window.dispatchEvent(new CustomEvent('transaction-added', { detail: tx }));
   };
-
-  const navItems = [
-    { name: 'Beranda', path: '/dashboard/beranda', icon: Home },
-    { name: 'Laporan', path: '/dashboard/laporan', icon: PieChart },
-  ];
-
-  const navItemsRight = [
-    { name: 'Profil', path: '/dashboard/profil', icon: User },
-  ];
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#f5f5f7' }}>
@@ -96,68 +87,64 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
 
       {/* ── Bottom Navigation Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-[#e0e0e0] px-6 py-2 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
-        <div className="max-w-[860px] mx-auto flex items-center justify-between relative">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#e0e0e0] px-4 py-2 pb-safe">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           
-          {/* Left Items */}
-          <div className="flex gap-8">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.path;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => router.push(item.path)}
-                  className="flex flex-col items-center gap-1 min-w-[60px] py-1"
-                >
-                  <Icon 
-                    size={24} 
-                    className={`transition-colors ${isActive ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
-                    strokeWidth={isActive ? 2.5 : 2} 
-                  />
-                  <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
-                    {item.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <button
+            onClick={() => router.push('/dashboard/beranda')}
+            className="flex flex-col items-center gap-1 w-[25%] py-1"
+          >
+            <LayoutGrid 
+              size={24} 
+              className={`transition-colors ${pathname === '/dashboard/beranda' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
+              strokeWidth={pathname === '/dashboard/beranda' ? 2 : 1.5} 
+            />
+            <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/beranda' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
+              DASHBOARD
+            </span>
+          </button>
 
-          {/* Center FAB (Floating Action Button) */}
-          <div className="absolute left-1/2 -translate-x-1/2 -top-8">
-            <button
-              onClick={() => setInputMenuOpen(true)}
-              className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-[0_8px_20px_rgba(0,102,204,0.4)] transition-transform hover:scale-105 active:scale-95 ${inputMenuOpen ? 'bg-[#1d1d1f] rotate-45' : 'bg-[#0066cc]'}`}
-              style={{ transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}
-            >
-              <Plus size={30} strokeWidth={2.5} />
-            </button>
-          </div>
+          <button
+            onClick={() => setInputMenuOpen(true)}
+            className="flex flex-col items-center gap-1 w-[25%] py-1"
+          >
+            <Wallet 
+              size={24} 
+              className={`transition-colors ${inputMenuOpen ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
+              strokeWidth={inputMenuOpen ? 2 : 1.5} 
+            />
+            <span className={`text-[10px] font-medium transition-colors ${inputMenuOpen ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
+              WALLET
+            </span>
+          </button>
 
-          {/* Right Items */}
-          <div className="flex gap-8">
-            <div className="min-w-[60px]"></div> {/* Spacer to balance FAB */}
-            {navItemsRight.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.path;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => router.push(item.path)}
-                  className="flex flex-col items-center gap-1 min-w-[60px] py-1"
-                >
-                  <Icon 
-                    size={24} 
-                    className={`transition-colors ${isActive ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
-                    strokeWidth={isActive ? 2.5 : 2} 
-                  />
-                  <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
-                    {item.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <button
+            onClick={() => router.push('/dashboard/laporan')}
+            className="flex flex-col items-center gap-1 w-[25%] py-1"
+          >
+            <History 
+              size={24} 
+              className={`transition-colors ${pathname === '/dashboard/laporan' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
+              strokeWidth={pathname === '/dashboard/laporan' ? 2 : 1.5} 
+            />
+            <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/laporan' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
+              HISTORY
+            </span>
+          </button>
+
+          <button
+            onClick={() => router.push('/dashboard/profil')}
+            className="flex flex-col items-center gap-1 w-[25%] py-1"
+          >
+            <Settings 
+              size={24} 
+              className={`transition-colors ${pathname === '/dashboard/profil' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
+              strokeWidth={pathname === '/dashboard/profil' ? 2 : 1.5} 
+            />
+            <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/profil' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
+              SETTINGS
+            </span>
+          </button>
           
         </div>
       </div>

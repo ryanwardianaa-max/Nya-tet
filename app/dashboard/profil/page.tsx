@@ -150,19 +150,28 @@ export default function ProfilPage() {
       {/* Privacy Modal */}
       {showPrivacy && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex justify-center items-end sm:items-center p-0 sm:p-4 animate-fade-in" onClick={() => setShowPrivacy(false)}>
-          <div className="bg-white rounded-t-[24px] sm:rounded-[24px] p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto animate-slide-up sm:animate-scale-in" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white rounded-t-[24px] sm:rounded-[24px] p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto animate-slide-up sm:animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 py-2">
               <h3 className="type-display-md">Kebijakan Privasi</h3>
               <button onClick={() => setShowPrivacy(false)} className="w-8 h-8 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[#7a7a7a]"><X size={18} /></button>
             </div>
-            <div className="prose prose-sm text-[#333]">
-              <p>Keamanan data Anda adalah prioritas kami.</p>
-              <h4>1. Penyimpanan Data</h4>
-              <p>Semua data transaksi Anda disimpan secara aman di cloud database menggunakan <strong>Supabase</strong> (arsitektur PostgreSQL). Data Anda tersimpan di server terenkripsi dengan standar internasional.</p>
-              <h4>2. Keamanan Berlapis (RLS)</h4>
-              <p>Database Nya-tet dilengkapi dengan fitur <em>Row Level Security (RLS)</em>, yang memastikan bahwa setiap pengguna hanya dapat melihat dan mengubah datanya sendiri. Mustahil bagi pengguna lain untuk mengakses catatan keuangan Anda.</p>
-              <h4>3. Login Google Oauth 2.0</h4>
-              <p>Kami menggunakan layanan autentikasi Google resmi. Aplikasi Nya-tet tidak pernah melihat atau menyimpan kata sandi (password) email Anda.</p>
+            <div className="prose prose-sm text-[#333] pb-8">
+              <p className="mb-4">Terakhir diperbarui: 31 Mei 2026. Keamanan privasi dan data finansial Anda adalah prioritas utama dan komitmen kami di Nya-tet.</p>
+              
+              <h4 className="font-semibold text-base mt-5 mb-2 text-[#1d1d1f]">1. Pengumpulan dan Penyimpanan Data</h4>
+              <p className="mb-3 text-justify">Kami mengumpulkan informasi yang Anda masukkan secara langsung ke dalam aplikasi, yaitu data nominal transaksi, keterangan, dan kategori pengeluaran/pemasukan. Semua data ini disimpan secara aman di cloud database menggunakan <strong>Supabase (arsitektur PostgreSQL)</strong>. Data tersebut terenkripsi pada saat transit dan pada saat istirahat (<em>encryption at rest</em>) dengan standar internasional AES-256.</p>
+              
+              <h4 className="font-semibold text-base mt-5 mb-2 text-[#1d1d1f]">2. Keamanan Tingkat Lanjut (Row Level Security)</h4>
+              <p className="mb-3 text-justify">Database Nya-tet dilengkapi dengan fitur keamanan <em>Row Level Security (RLS)</em> yang sangat ketat. Kebijakan RLS ini menjamin bahwa setiap sesi pengguna hanya dapat membaca, menulis, atau memodifikasi baris data yang secara kriptografis terikat dengan ID pengguna otentik mereka. Mustahil secara teknis bagi pengguna lain, atau bahkan celah eksploitasi, untuk mengakses catatan keuangan Anda tanpa otorisasi langsung dari sesi login Anda.</p>
+              
+              <h4 className="font-semibold text-base mt-5 mb-2 text-[#1d1d1f]">3. Autentikasi Menggunakan Akun Google</h4>
+              <p className="mb-3 text-justify">Untuk menghindari risiko kebocoran kata sandi, Nya-tet menggunakan layanan autentikasi standar industri <strong>OAuth 2.0 yang dikelola langsung oleh Google</strong>. Nya-tet tidak pernah meminta, melihat, mencegat, ataupun menyimpan kata sandi (password) email Anda. Semua proses validasi identitas dilakukan di server Google, dan Nya-tet hanya menerima token akses yang aman.</p>
+
+              <h4 className="font-semibold text-base mt-5 mb-2 text-[#1d1d1f]">4. Pemrosesan Data oleh Artificial Intelligence</h4>
+              <p className="mb-3 text-justify">Saat Anda menggunakan fitur "Scan Nota" atau "Suara AI", gambar dan suara Anda dikirim secara anonim melalui koneksi HTTPS yang aman ke server <strong>Google Gemini AI</strong> untuk diproses menjadi teks terstruktur. Data gambar atau suara Anda hanya digunakan seketika untuk ekstraksi data (OCR) dan <strong>tidak disimpan</strong>, tidak dilatih (<em>not trained on</em>), dan tidak digunakan untuk tujuan periklanan oleh sistem AI kami.</p>
+
+              <h4 className="font-semibold text-base mt-5 mb-2 text-[#1d1d1f]">5. Hak Anda (Penghapusan Data)</h4>
+              <p className="mb-3 text-justify">Anda memiliki kontrol penuh atas data Anda. Melalui menu "Reset Data" di halaman profil ini, Anda kapan saja berhak memicu perintah penghapusan (<em>hard delete</em>). Sekali Anda mengonfirmasi penghapusan, seluruh riwayat transaksi Anda akan dimusnahkan secara permanen dari tabel server tanpa ada salinan yang tertinggal untuk dipulihkan.</p>
             </div>
           </div>
         </div>
@@ -171,8 +180,8 @@ export default function ProfilPage() {
       {/* About Modal */}
       {showAbout && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex justify-center items-end sm:items-center p-0 sm:p-4 animate-fade-in" onClick={() => setShowAbout(false)}>
-          <div className="bg-white rounded-t-[24px] sm:rounded-[24px] p-6 max-w-lg w-full animate-slide-up sm:animate-scale-in" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white rounded-t-[24px] sm:rounded-[24px] p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto animate-slide-up sm:animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 py-2">
               <h3 className="type-display-md">Tentang Nya-tet</h3>
               <button onClick={() => setShowAbout(false)} className="w-8 h-8 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[#7a7a7a]"><X size={18} /></button>
             </div>
@@ -180,15 +189,27 @@ export default function ProfilPage() {
               <div className="w-20 h-20 rounded-[20px] bg-[#0066cc] flex items-center justify-center text-white mx-auto mb-4 shadow-lg shadow-blue-500/30">
                 <span className="text-2xl font-bold">N</span>
               </div>
-              <h4 className="type-display-md text-xl">Nya-tet</h4>
-              <p className="text-[#7a7a7a] text-sm">Versi 1.1.0</p>
+              <h4 className="type-display-md text-xl">Nya-tet AI Tracker</h4>
+              <p className="text-[#7a7a7a] text-sm mt-1">Versi 2.0.0 (Build 2026.5)</p>
             </div>
-            <p className="text-center text-[#333] mb-6">
-              Aplikasi pencatatan keuangan cerdas berbasis Artificial Intelligence.
-              Didukung oleh model bahasa <strong>Google Gemini 1.5 Flash</strong> untuk menerjemahkan ucapan suara dan gambar struk belanja menjadi data transaksi keuangan terstruktur.
-            </p>
-            <div className="p-4 bg-[#f5f5f7] rounded-[16px] text-center">
-              <p className="text-sm font-medium text-[#1d1d1f]">Dikembangkan untuk kemudahan mengatur finansial sehari-hari.</p>
+            
+            <div className="text-sm text-[#333] space-y-4 text-justify pb-4">
+              <p>
+                <strong>Nya-tet</strong> adalah aplikasi pencatatan keuangan generasi terbaru yang merevolusi cara Anda mengatur pengeluaran dan pemasukan finansial sehari-hari. Berbeda dengan aplikasi pembukuan tradisional yang memaksa Anda mengetik data secara manual setiap kali berbelanja, Nya-tet dirancang khusus untuk memahami konteks manusia dengan cepat.
+              </p>
+              
+              <p>
+                Ditenagai oleh teknologi model bahasa cerdas <strong>Google Gemini 1.5 Flash</strong>, fitur unggulan aplikasi ini memungkinkan Anda cukup mengambil foto struk belanja yang lecek sekalipun, atau menekan tombol rekam suara dan berbicara seperti: <em>"Habis 50 ribu buat beli kopi susu di cafe depan."</em> AI kami akan secara instan mengonversinya menjadi pencatatan terstruktur yang otomatis mendeteksi nominal harga, kategori (Makanan/Transportasi/Belanja), dan tanggal transaksi secara cerdas tanpa campur tangan Anda sedikitpun.
+              </p>
+
+              <div className="p-4 bg-[#f5f5f7] rounded-[16px] text-center my-6">
+                <p className="font-medium text-[#1d1d1f] mb-1">Diciptakan dengan cinta dan kecerdasan 💻🤖</p>
+                <p className="text-xs text-[#7a7a7a]">Dikembangkan oleh <strong>Ryan Wardiana</strong></p>
+              </div>
+
+              <p>
+                Kami percaya bahwa mengatur uang tidak seharusnya menjadi beban. Dengan fitur pelaporan yang interaktif, dukungan integrasi ekspor PDF dan Microsoft Excel, hingga kemampuan membagikan rekapitulasi ringkas secara otomatis melalui WhatsApp, Nya-tet bertujuan agar Anda dapat mengambil kembali kendali penuh atas kesejahteraan finansial Anda.
+              </p>
             </div>
           </div>
         </div>
