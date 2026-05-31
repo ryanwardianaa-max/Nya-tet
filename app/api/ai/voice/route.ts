@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   if (apiKey) {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const prompt = `Ekstrak informasi transaksi keuangan dari teks berikut dalam Bahasa Indonesia.
 
