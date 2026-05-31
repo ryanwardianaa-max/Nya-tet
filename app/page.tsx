@@ -22,13 +22,17 @@ export default function AuthPage() {
     setMessage('');
     try {
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { full_name: name } },
         });
         if (error) throw error;
-        setMessage('Cek email Anda untuk konfirmasi akun.');
+        if (data?.session) {
+          router.push('/dashboard');
+        } else {
+          setMessage('Pendaftaran berhasil! Silakan pindah ke tab Masuk.');
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
