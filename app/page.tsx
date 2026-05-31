@@ -215,7 +215,6 @@ export default function AuthPage() {
             </svg>
             Masuk dengan Google
           </button>
-        </div>
       </div>
 
       {/* Footer */}
