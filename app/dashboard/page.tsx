@@ -59,7 +59,7 @@ export default function DashboardPage() {
 
         const { data, error } = await supabase
           .from('transactions')
-          .insert([insertData])
+          .insert([insertData] as any)
           .select()
           .single();
 
