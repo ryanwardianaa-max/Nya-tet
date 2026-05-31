@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Wallet } from 'lucide-react';
+import { Wallet, Sparkles } from 'lucide-react';
 
 export default function AuthPage() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -67,37 +67,61 @@ export default function AuthPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-5"
-      style={{ background: '#f5f5f7' }}
+      className="min-h-screen flex flex-col items-center justify-center px-5 relative overflow-hidden"
+      style={{ background: '#f8f9fa' }}
     >
+      {/* Subtle Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-purple-500/10 blur-[100px] pointer-events-none" />
+
       {/* Brand */}
-      <div className="text-center mb-10">
-        <div
-          className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20"
-          style={{ background: 'linear-gradient(135deg, #007aff 0%, #005bb5 100%)' }}
-        >
-          <Wallet size={32} color="white" strokeWidth={1.5} />
+      <div className="text-center mb-10 relative z-10">
+        <div className="relative w-20 h-20 mx-auto mb-6 group cursor-default">
+          {/* Outer glow ring */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#0066cc] to-[#3399ff] rounded-[24px] blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
+          
+          {/* Main Logo Box */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#005bb5] via-[#007aff] to-[#3399ff] rounded-[24px] shadow-[0_8px_32px_rgba(0,102,204,0.4)] flex items-center justify-center overflow-hidden border border-white/20">
+            {/* Glass reflection */}
+            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent"></div>
+            
+            <Wallet size={36} color="white" strokeWidth={1.5} className="relative z-10 drop-shadow-md" />
+            
+            {/* Sparkle badge */}
+            <div className="absolute -top-1 -right-1 w-8 h-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-sm animate-pulse" style={{ animationDuration: '3s' }}>
+              <Sparkles size={14} className="text-white" />
+            </div>
+          </div>
         </div>
+
         <h1
-          className="font-semibold tracking-tight text-[#1d1d1f]"
-          style={{ fontSize: '32px', lineHeight: '1.1', letterSpacing: '-0.03em' }}
+          className="font-extrabold tracking-tight"
+          style={{ 
+            fontSize: '38px', 
+            lineHeight: '1.2', 
+            letterSpacing: '-0.04em',
+            background: 'linear-gradient(135deg, #1d1d1f 0%, #434345 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.05))'
+          }}
         >
           Nya-tet
         </h1>
-        <p style={{ color: '#7a7a7a', fontSize: '15px', marginTop: '6px' }}>
-          Catat keuangan, cukup bicara.
+        <p className="mt-2 font-medium" style={{ color: '#7a7a7a', fontSize: '15px', letterSpacing: '-0.01em' }}>
+          Catat keuangan, <span className="text-[#0066cc] font-semibold">cukup bicara.</span>
         </p>
       </div>
 
       {/* Card */}
       <div
-        className="w-full"
+        className="w-full relative z-10 shadow-[0_20px_40px_rgba(0,0,0,0.04)] backdrop-blur-xl"
         style={{
           maxWidth: '380px',
-          background: '#ffffff',
-          borderRadius: '18px',
-          border: '1px solid #e0e0e0',
-          padding: '28px 24px',
+          background: 'rgba(255,255,255,0.85)',
+          borderRadius: '24px',
+          border: '1px solid rgba(255,255,255,0.5)',
+          padding: '32px 28px',
         }}
       >
         {/* Tab */}
