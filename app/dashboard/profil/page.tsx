@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
-import { LogOut, Trash2, Shield, Info, X, AlertTriangle } from 'lucide-react';
+import { LogOut, Trash2, Shield, Info, X, AlertTriangle, Edit2 } from 'lucide-react';
 
 export default function ProfilPage() {
   const router = useRouter();
@@ -91,7 +91,7 @@ export default function ProfilPage() {
           ) : (
             <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setIsEditingName(true)}>
               <p className="type-body-strong text-[#1d1d1f] text-lg group-hover:text-[#0066cc] transition-colors">{walletName}</p>
-              <import_lucide.Edit2 size={14} className="text-[#7a7a7a] group-hover:text-[#0066cc]" />
+              <Edit2 size={14} className="text-[#7a7a7a] group-hover:text-[#0066cc]" />
             </div>
           )}
           <p className="type-caption text-[#7a7a7a]">{email || 'Memuat...'}</p>
