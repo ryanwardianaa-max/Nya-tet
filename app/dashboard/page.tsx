@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase';
 import { Transaction, formatRupiah, CATEGORIES } from '@/lib/types';
 import BalanceCard from '@/components/BalanceCard';
-import ExpenseChart from '@/components/ExpenseChart';
+import dynamic from 'next/dynamic';
+const ExpenseChart = dynamic(() => import('@/components/ExpenseChart'), { ssr: false });
 import TransactionList from '@/components/TransactionList';
 import { Download, TrendingUp, TrendingDown } from 'lucide-react';
-import { exportToExcel } from '@/lib/excel';
 
 export default function DashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -127,6 +127,7 @@ export default function DashboardPage() {
   const handleExportExcel = async () => {
     try {
       setExporting(true);
+      const { exportToExcel } = await import('@/lib/excel');
       await exportToExcel(transactions, monthName);
     } catch (err) {
       console.error(err);
