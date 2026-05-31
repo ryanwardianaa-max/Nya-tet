@@ -14,8 +14,8 @@ type ModalState = 'idle' | 'recording' | 'processing' | 'confirm' | 'saved';
 
 declare global {
   interface Window {
-    SpeechRecognition: new () => SpeechRecognition;
-    webkitSpeechRecognition: new () => SpeechRecognition;
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
   }
 }
 
