@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
-import { LayoutGrid, Wallet, History, Settings, Plus, Mic, Camera, FileText, X } from 'lucide-react';
+import { Home, PieChart, PlusCircle, User, Mic, Camera, FileText, X } from 'lucide-react';
 import VoiceModal from '@/components/VoiceModal';
 import ScanModal from '@/components/ScanModal';
 import ManualModal from '@/components/ManualModal';
@@ -87,34 +87,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
 
       {/* ── Bottom Navigation Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#e0e0e0] px-4 py-2 pb-safe">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#e0e0e0] px-4 py-2 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
         <div className="max-w-md mx-auto flex items-center justify-between">
           
           <button
             onClick={() => router.push('/dashboard/beranda')}
             className="flex flex-col items-center gap-1 w-[25%] py-1"
           >
-            <LayoutGrid 
+            <Home 
               size={24} 
               className={`transition-colors ${pathname === '/dashboard/beranda' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
               strokeWidth={pathname === '/dashboard/beranda' ? 2 : 1.5} 
             />
             <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/beranda' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
-              DASHBOARD
-            </span>
-          </button>
-
-          <button
-            onClick={() => setInputMenuOpen(true)}
-            className="flex flex-col items-center gap-1 w-[25%] py-1"
-          >
-            <Wallet 
-              size={24} 
-              className={`transition-colors ${inputMenuOpen ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
-              strokeWidth={inputMenuOpen ? 2 : 1.5} 
-            />
-            <span className={`text-[10px] font-medium transition-colors ${inputMenuOpen ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
-              WALLET
+              Beranda
             </span>
           </button>
 
@@ -122,13 +108,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             onClick={() => router.push('/dashboard/laporan')}
             className="flex flex-col items-center gap-1 w-[25%] py-1"
           >
-            <History 
+            <PieChart 
               size={24} 
               className={`transition-colors ${pathname === '/dashboard/laporan' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
               strokeWidth={pathname === '/dashboard/laporan' ? 2 : 1.5} 
             />
             <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/laporan' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
-              HISTORY
+              Laporan
+            </span>
+          </button>
+
+          <button
+            onClick={() => setInputMenuOpen(true)}
+            className="flex flex-col items-center gap-1 w-[25%] py-1"
+          >
+            <PlusCircle 
+              size={24} 
+              className={`transition-colors ${inputMenuOpen ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
+              strokeWidth={inputMenuOpen ? 2 : 1.5} 
+            />
+            <span className={`text-[10px] font-medium transition-colors ${inputMenuOpen ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
+              Catat
             </span>
           </button>
 
@@ -136,13 +136,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             onClick={() => router.push('/dashboard/profil')}
             className="flex flex-col items-center gap-1 w-[25%] py-1"
           >
-            <Settings 
+            <User 
               size={24} 
               className={`transition-colors ${pathname === '/dashboard/profil' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
               strokeWidth={pathname === '/dashboard/profil' ? 2 : 1.5} 
             />
             <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/profil' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
-              SETTINGS
+              Profil
             </span>
           </button>
           
