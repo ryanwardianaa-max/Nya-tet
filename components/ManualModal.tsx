@@ -21,7 +21,11 @@ export default function ManualModal({ onClose, onSaved }: ManualModalProps) {
 
   const handleSave = () => {
     if (data.jumlah <= 0) return;
-    onSaved({ ...data, source: 'manual' });
+    onSaved({ 
+      ...data, 
+      source: 'manual',
+      created_at: data.tanggal ? new Date(data.tanggal).toISOString() : new Date().toISOString()
+    });
     setState('saved');
     setTimeout(onClose, 1000);
   };

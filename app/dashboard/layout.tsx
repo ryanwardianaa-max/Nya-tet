@@ -1,31 +1,36 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
+import { Home, PieChart, User, Plus, Mic, Camera, FileText, X } from 'lucide-react';
 import VoiceModal from '@/components/VoiceModal';
 import ScanModal from '@/components/ScanModal';
 import ManualModal from '@/components/ManualModal';
 import { Transaction } from '@/lib/types';
-import { Mic, Camera, Plus, LogOut, BarChart2 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
+  
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
+  const [inputMenuOpen, setInputMenuOpen] = useState(false);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
-  };
-
-  const handleTransactionSaved = (tx: Omit<Transaction, 'id' | 'user_id' | 'created_at'>) => {
-    // Dispatch a custom event so dashboard page can pick it up
+  const handleTransactionSaved = (tx: Omit<Transaction, 'id' | 'user_id' | 'created_at'> & { created_at?: string }) => {
     window.dispatchEvent(new CustomEvent('transaction-added', { detail: tx }));
   };
+
+  const navItems = [
+    { name: 'Beranda', path: '/dashboard/beranda', icon: Home },
+    { name: 'Laporan', path: '/dashboard/laporan', icon: PieChart },
+  ];
+
+  const navItemsRight = [
+    { name: 'Profil', path: '/dashboard/profil', icon: User },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#f5f5f7' }}>
@@ -34,65 +39,127 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {children}
       </main>
 
-      {/* ── Action Bar ── */}
-      <div className="action-bar flex items-center justify-center gap-8 md:gap-10">
-        
-        {/* Logout button (Bottom Left) */}
-        <button
-          onClick={handleSignOut}
-          className="absolute left-6 md:left-8 flex flex-col items-center gap-1 group"
-          title="Keluar"
+      {/* ── Input Pop-up Menu ── */}
+      {inputMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm animate-fade-in flex flex-col justify-end"
+          onClick={() => setInputMenuOpen(false)}
         >
-          <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
-            style={{ background: '#ffe5e5', color: '#ff3b30' }}>
-            <LogOut size={18} />
-          </div>
-          <span className="type-fine" style={{ color: '#ff3b30', fontSize: '10px' }}>Keluar</span>
-        </button>
-
-        {/* Scan button */}
-        <button
-          onClick={() => setScanOpen(true)}
-          className="flex flex-col items-center gap-1 group"
-          title="Scan Nota"
-        >
-          <div className="w-12 h-12 rounded-[14px] flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
-            style={{ background: '#f0f0f0', color: '#1d1d1f' }}>
-            <Camera size={22} />
-          </div>
-          <span className="type-fine" style={{ color: '#7a7a7a', fontSize: '10px' }}>Scan</span>
-        </button>
-
-        {/* Voice button — center, larger, Action Blue pill */}
-        <button
-          onClick={() => setVoiceOpen(true)}
-          className="flex flex-col items-center gap-1 group"
-          title="Rekam Suara"
-        >
-          <div
-            className="w-16 h-16 rounded-pill flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95 relative"
-            style={{ background: '#0066cc', color: 'white', borderRadius: '9999px' }}
+          <div 
+            className="bg-white rounded-t-[32px] p-6 pb-28 animate-slide-up"
+            style={{ boxShadow: '0 -10px 40px rgba(0,0,0,0.1)' }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <Mic size={26} />
-            {/* Pulse ring */}
-            <div className="absolute inset-0 rounded-pill animate-pulse-ring opacity-0"
-              style={{ background: 'rgba(0,102,204,0.3)', borderRadius: '9999px', animationDuration: '2s', animationDelay: '0.5s' }} />
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="type-display-md text-[#1d1d1f] text-xl">Tambah Transaksi</h3>
+              <button 
+                onClick={() => setInputMenuOpen(false)}
+                className="w-8 h-8 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[#7a7a7a]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4">
+              <button
+                onClick={() => { setInputMenuOpen(false); setVoiceOpen(true); }}
+                className="flex flex-col items-center gap-3 group"
+              >
+                <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#0066cc] text-white transition-transform group-hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/30">
+                  <Mic size={28} />
+                </div>
+                <span className="type-body font-medium text-[#1d1d1f]">Suara AI</span>
+              </button>
+              
+              <button
+                onClick={() => { setInputMenuOpen(false); setScanOpen(true); }}
+                className="flex flex-col items-center gap-3 group"
+              >
+                <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#ff9500] text-white transition-transform group-hover:scale-105 active:scale-95 shadow-lg shadow-orange-500/30">
+                  <Camera size={28} />
+                </div>
+                <span className="type-body font-medium text-[#1d1d1f]">Scan Nota</span>
+              </button>
+              
+              <button
+                onClick={() => { setInputMenuOpen(false); setManualOpen(true); }}
+                className="flex flex-col items-center gap-3 group"
+              >
+                <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#30d158] text-white transition-transform group-hover:scale-105 active:scale-95 shadow-lg shadow-green-500/30">
+                  <FileText size={28} />
+                </div>
+                <span className="type-body font-medium text-[#1d1d1f]">Manual</span>
+              </button>
+            </div>
           </div>
-          <span className="type-fine font-semibold" style={{ color: '#0066cc', fontSize: '10px' }}>Suara</span>
-        </button>
+        </div>
+      )}
 
-        {/* Manual button */}
-        <button
-          onClick={() => setManualOpen(true)}
-          className="flex flex-col items-center gap-1 group"
-          title="Catat Manual"
-        >
-          <div className="w-12 h-12 rounded-[14px] flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
-            style={{ background: '#f0f0f0', color: '#1d1d1f' }}>
-            <Plus size={22} />
+      {/* ── Bottom Navigation Bar ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-[#e0e0e0] px-6 py-2 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
+        <div className="max-w-[860px] mx-auto flex items-center justify-between relative">
+          
+          {/* Left Items */}
+          <div className="flex gap-8">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.path;
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => router.push(item.path)}
+                  className="flex flex-col items-center gap-1 min-w-[60px] py-1"
+                >
+                  <Icon 
+                    size={24} 
+                    className={`transition-colors ${isActive ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
+                    strokeWidth={isActive ? 2.5 : 2} 
+                  />
+                  <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
+                    {item.name}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-          <span className="type-fine" style={{ color: '#7a7a7a', fontSize: '10px' }}>Manual</span>
-        </button>
+
+          {/* Center FAB (Floating Action Button) */}
+          <div className="absolute left-1/2 -translate-x-1/2 -top-8">
+            <button
+              onClick={() => setInputMenuOpen(true)}
+              className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-[0_8px_20px_rgba(0,102,204,0.4)] transition-transform hover:scale-105 active:scale-95 ${inputMenuOpen ? 'bg-[#1d1d1f] rotate-45' : 'bg-[#0066cc]'}`}
+              style={{ transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}
+            >
+              <Plus size={30} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {/* Right Items */}
+          <div className="flex gap-8">
+            <div className="min-w-[60px]"></div> {/* Spacer to balance FAB */}
+            {navItemsRight.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.path;
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => router.push(item.path)}
+                  className="flex flex-col items-center gap-1 min-w-[60px] py-1"
+                >
+                  <Icon 
+                    size={24} 
+                    className={`transition-colors ${isActive ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`} 
+                    strokeWidth={isActive ? 2.5 : 2} 
+                  />
+                  <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
+                    {item.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          
+        </div>
       </div>
 
       {/* ── Modals ── */}

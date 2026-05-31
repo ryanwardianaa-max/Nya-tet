@@ -96,12 +96,10 @@ export default function VoiceModal({ onClose, onSaved }: VoiceModalProps) {
 
   const handleSave = () => {
     if (!result) return;
-    onSaved({
-      jumlah: result.jumlah,
-      tipe: result.tipe,
-      kategori: result.kategori,
-      keterangan: result.keterangan,
+    onSaved({ 
+      ...result, 
       source: 'voice',
+      created_at: result.tanggal ? new Date(result.tanggal).toISOString() : new Date().toISOString()
     });
     setState('saved');
     setTimeout(onClose, 1000);

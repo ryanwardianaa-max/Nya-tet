@@ -28,19 +28,27 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const prompt = `Kamu adalah sistem OCR untuk struk belanja. Analisis gambar struk/nota ini.
+    const prompt = `Kamu adalah akuntan ahli dan sistem OCR cerdas. Analisis gambar struk/nota ini dengan sangat teliti.
+
+Instruksi Khusus:
+1. "jumlah": Temukan TOTAL AKHIR yang harus dibayar. Abaikan subtotal, diskon, atau jumlah uang kembalian. Cari kata kunci "Total", "Grand Total", "Amount". (Format angka saja).
+2. "kategori": Tebak secara cerdas berdasarkan nama toko atau barang. 
+   - Restoran/Kafe/Kopi -> "Makanan"
+   - Supermarket/Minimarket/Indomaret/Alfamart -> "Belanja"
+   - Apotek/Rumah Sakit -> "Kesehatan"
+   - PLN/PDAM/Pulsa/Internet -> "Tagihan"
+   - Bensin/Parkir/Toll/Gojek/Grab -> "Transportasi"
+   - Lainnya -> "Lainnya"
 
 Kembalikan HANYA JSON valid (tanpa markdown):
 {
-  "jumlah": <total belanja dalam rupiah, angka saja>,
+  "jumlah": <total akhir belanja dalam rupiah, angka saja tanpa Rp/titik>,
   "toko": <nama toko/merchant>,
-  "tanggal": <tanggal dalam format YYYY-MM-DD, atau null>,
-  "keterangan": <deskripsi singkat max 60 karakter>,
+  "tanggal": <tanggal struk format YYYY-MM-DD, atau gunakan hari ini jika tidak jelas>,
+  "keterangan": <nama toko beserta 1-2 barang utama, max 60 karakter>,
   "tipe": "pengeluaran",
-  "kategori": <"Makanan", "Belanja", "Kesehatan", "Tagihan", atau "Lainnya">
-}
-
-Jika tidak bisa membaca dengan jelas, gunakan nilai terbaik yang bisa diestimasi.`;
+  "kategori": <salah satu kategori di atas>
+}`;
 
     // Remove data URL prefix if present
     const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;

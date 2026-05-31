@@ -105,7 +105,11 @@ export default function ScanModal({ onClose, onSaved }: ScanModalProps) {
 
   const handleSave = () => {
     if (!result) return;
-    onSaved({ ...result, source: 'scan' });
+    onSaved({ 
+      ...result, 
+      source: 'scan',
+      created_at: result.tanggal ? new Date(result.tanggal).toISOString() : new Date().toISOString()
+    });
     setState('saved');
     setTimeout(handleClose, 1000);
   };
@@ -280,16 +284,6 @@ export default function ScanModal({ onClose, onSaved }: ScanModalProps) {
               </div>
             )}
 
-            {/* Demo struk */}
-            <div className="mt-5 pt-5" style={{ borderTop: '1px solid #f0f0f0' }}>
-              <button
-                onClick={() => processImage('demo')}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-[11px] type-caption-strong transition-all hover:bg-[#f0f0f0]"
-                style={{ background: '#f5f5f7', color: '#0066cc', border: 'none', cursor: 'pointer' }}
-              >
-                <ImageIcon size={15} /> Gunakan Struk Demo
-              </button>
-            </div>
           </>
         )}
       </div>

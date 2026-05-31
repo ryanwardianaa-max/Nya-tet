@@ -16,6 +16,7 @@ export interface AIVoiceResult {
   kategori: string;
   keterangan: string;
   tipe: TransactionType;
+  tanggal?: string;
 }
 
 export interface AIScanResult {

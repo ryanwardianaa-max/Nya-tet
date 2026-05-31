@@ -99,6 +99,19 @@ export default function ConfirmCard({ result, onChange, onSave, onRetry }: Confi
             ))}
           </div>
         </div>
+
+        {/* Date */}
+        <div>
+          <label className="type-caption-strong block mb-2 text-[#1d1d1f]">Tanggal</label>
+          <input
+            type="date"
+            value={result.tanggal || new Date().toISOString().split('T')[0]}
+            max={new Date().toISOString().split('T')[0]}
+            min={new Date(new Date().setFullYear(new Date().getFullYear() - 2)).toISOString().split('T')[0]}
+            onChange={e => onChange({ ...result, tanggal: e.target.value })}
+            className="input-field"
+          />
+        </div>
       </div>
 
       {/* Actions */}
