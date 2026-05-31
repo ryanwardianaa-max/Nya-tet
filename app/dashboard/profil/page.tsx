@@ -9,6 +9,8 @@ export default function ProfilPage() {
   const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState<string>('');
+  const [walletName, setWalletName] = useState<string>('Pengguna Nya-tet');
+  const [isEditingName, setIsEditingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
@@ -17,8 +19,21 @@ export default function ProfilPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user?.email) setEmail(data.user.email);
+      if (data.user?.user_metadata?.wallet_name) {
+        setWalletName(data.user.user_metadata.wallet_name);
+      } else if (data.user?.user_metadata?.full_name) {
+        setWalletName(data.user.user_metadata.full_name);
+      }
     });
   }, [supabase]);
+
+  const handleSaveName = async () => {
+    setIsEditingName(false);
+    if (!walletName.trim()) setWalletName('Pengguna Nya-tet');
+    await supabase.auth.updateUser({
+      data: { wallet_name: walletName.trim() || 'Pengguna Nya-tet' }
+    });
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -57,11 +72,28 @@ export default function ProfilPage() {
 
       {/* User Info Card */}
       <div className="bg-white rounded-[24px] p-6 mb-8 border border-[#e0e0e0] flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-[#0066cc] flex items-center justify-center text-white text-2xl font-semibold shadow-md">
+        <div className="w-16 h-16 rounded-full bg-[#0066cc] flex items-center justify-center text-white text-2xl font-semibold shadow-md shrink-0">
           {email ? email.charAt(0).toUpperCase() : 'U'}
         </div>
-        <div>
-          <p className="type-body-strong text-[#1d1d1f] text-lg">Pengguna Nya-tet</p>
+        <div className="flex-1">
+          {isEditingName ? (
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={walletName} 
+                onChange={(e) => setWalletName(e.target.value)}
+                className="type-body-strong text-[#1d1d1f] text-lg border-b border-[#0066cc] outline-none bg-transparent w-full"
+                autoFocus
+                onBlur={handleSaveName}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setIsEditingName(true)}>
+              <p className="type-body-strong text-[#1d1d1f] text-lg group-hover:text-[#0066cc] transition-colors">{walletName}</p>
+              <import_lucide.Edit2 size={14} className="text-[#7a7a7a] group-hover:text-[#0066cc]" />
+            </div>
+          )}
           <p className="type-caption text-[#7a7a7a]">{email || 'Memuat...'}</p>
         </div>
       </div>

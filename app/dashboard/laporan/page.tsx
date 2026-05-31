@@ -183,12 +183,13 @@ _Dibuat otomatis oleh Nya-tet App_ 🚀`;
           <button
             key={filter}
             onClick={() => setDateFilter(filter)}
-            className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all flex items-center gap-2 ${
               dateFilter === filter 
                 ? 'bg-[#0066cc] text-white shadow-md' 
                 : 'bg-white text-[#7a7a7a] border border-[#e0e0e0] hover:bg-[#f0f0f0]'
             }`}
           >
+            {filter === 'custom' && <CalendarIcon size={14} />}
             {filter.charAt(0).toUpperCase() + filter.slice(1)}
           </button>
         ))}
@@ -196,21 +197,26 @@ _Dibuat otomatis oleh Nya-tet App_ 🚀`;
 
       {/* Custom Date Picker */}
       {dateFilter === 'custom' && (
-        <div className="flex items-center gap-3 mb-6 p-4 bg-white rounded-2xl border border-[#e0e0e0] animate-slide-up">
-          <CalendarIcon size={18} className="text-[#7a7a7a]" />
-          <input 
-            type="date" 
-            value={customStartDate} 
-            onChange={(e) => setCustomStartDate(e.target.value)}
-            className="bg-transparent text-[14px] text-[#1d1d1f] outline-none"
-          />
-          <span className="text-[#7a7a7a]">hingga</span>
-          <input 
-            type="date" 
-            value={customEndDate} 
-            onChange={(e) => setCustomEndDate(e.target.value)}
-            className="bg-transparent text-[14px] text-[#1d1d1f] outline-none"
-          />
+        <div className="flex items-center gap-3 mb-6 p-4 bg-white rounded-2xl border border-[#e0e0e0] animate-slide-up shadow-sm">
+          <div className="flex flex-col flex-1">
+            <label className="text-[11px] font-semibold text-[#7a7a7a] uppercase tracking-wider mb-1">Mulai Dari</label>
+            <input 
+              type="date" 
+              value={customStartDate} 
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              className="w-full bg-[#f5f5f7] rounded-[10px] p-2 text-[14px] text-[#1d1d1f] border border-[#e0e0e0] outline-none focus:border-[#0066cc]"
+            />
+          </div>
+          <span className="text-[#7a7a7a] font-medium mt-4">-</span>
+          <div className="flex flex-col flex-1">
+            <label className="text-[11px] font-semibold text-[#7a7a7a] uppercase tracking-wider mb-1">Sampai</label>
+            <input 
+              type="date" 
+              value={customEndDate} 
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              className="w-full bg-[#f5f5f7] rounded-[10px] p-2 text-[14px] text-[#1d1d1f] border border-[#e0e0e0] outline-none focus:border-[#0066cc]"
+            />
+          </div>
         </div>
       )}
 

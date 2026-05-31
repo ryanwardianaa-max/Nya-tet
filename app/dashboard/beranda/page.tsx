@@ -13,6 +13,7 @@ type TypeFilter = 'all' | 'pemasukan' | 'pengeluaran';
 export default function BerandaPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [walletName, setWalletName] = useState<string>('Beranda');
   
   const [dateFilter, setDateFilter] = useState<DateFilter>('bulan');
   const [customStartDate, setCustomStartDate] = useState('');
@@ -27,6 +28,11 @@ export default function BerandaPage() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      if (user?.user_metadata?.wallet_name) {
+        setWalletName(user.user_metadata.wallet_name);
+      } else if (user?.user_metadata?.full_name) {
+        setWalletName(user.user_metadata.full_name);
+      }
 
       let query = supabase
         .from('transactions')
@@ -158,7 +164,7 @@ export default function BerandaPage() {
         <p className="type-caption" style={{ color: '#7a7a7a' }}>
           {new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }).format(now)}
         </p>
-        <h1 className="type-display-md text-[#1d1d1f] mt-1">Beranda</h1>
+        <h1 className="type-display-md text-[#1d1d1f] mt-1 capitalize">{walletName}</h1>
       </div>
 
       {/* Date Filter Pills */}
@@ -167,12 +173,13 @@ export default function BerandaPage() {
           <button
             key={filter}
             onClick={() => setDateFilter(filter)}
-            className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all flex items-center gap-2 ${
               dateFilter === filter 
                 ? 'bg-[#1d1d1f] text-white shadow-md' 
                 : 'bg-white text-[#7a7a7a] border border-[#e0e0e0] hover:bg-[#f0f0f0]'
             }`}
           >
+            {filter === 'custom' && <CalendarIcon size={14} />}
             {filter.charAt(0).toUpperCase() + filter.slice(1)}
           </button>
         ))}
@@ -180,21 +187,26 @@ export default function BerandaPage() {
 
       {/* Custom Date Picker */}
       {dateFilter === 'custom' && (
-        <div className="flex items-center gap-3 mb-6 p-4 bg-white rounded-2xl border border-[#e0e0e0] animate-slide-up">
-          <CalendarIcon size={18} className="text-[#7a7a7a]" />
-          <input 
-            type="date" 
-            value={customStartDate} 
-            onChange={(e) => setCustomStartDate(e.target.value)}
-            className="bg-transparent text-[14px] text-[#1d1d1f] outline-none"
-          />
-          <span className="text-[#7a7a7a]">hingga</span>
-          <input 
-            type="date" 
-            value={customEndDate} 
-            onChange={(e) => setCustomEndDate(e.target.value)}
-            className="bg-transparent text-[14px] text-[#1d1d1f] outline-none"
-          />
+        <div className="flex items-center gap-3 mb-6 p-4 bg-white rounded-2xl border border-[#e0e0e0] animate-slide-up shadow-sm">
+          <div className="flex flex-col flex-1">
+            <label className="text-[11px] font-semibold text-[#7a7a7a] uppercase tracking-wider mb-1">Mulai Dari</label>
+            <input 
+              type="date" 
+              value={customStartDate} 
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              className="w-full bg-[#f5f5f7] rounded-[10px] p-2 text-[14px] text-[#1d1d1f] border border-[#e0e0e0] outline-none focus:border-[#0066cc]"
+            />
+          </div>
+          <span className="text-[#7a7a7a] font-medium mt-4">-</span>
+          <div className="flex flex-col flex-1">
+            <label className="text-[11px] font-semibold text-[#7a7a7a] uppercase tracking-wider mb-1">Sampai</label>
+            <input 
+              type="date" 
+              value={customEndDate} 
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              className="w-full bg-[#f5f5f7] rounded-[10px] p-2 text-[14px] text-[#1d1d1f] border border-[#e0e0e0] outline-none focus:border-[#0066cc]"
+            />
+          </div>
         </div>
       )}
 
