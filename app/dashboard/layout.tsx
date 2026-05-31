@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import { Home, PieChart, PlusCircle, User, Mic, Camera, FileText, X } from 'lucide-react';
 import VoiceModal from '@/components/VoiceModal';
@@ -90,8 +91,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#e0e0e0] px-4 py-2 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
         <div className="max-w-md mx-auto flex items-center justify-between">
           
-          <button
-            onClick={() => router.push('/dashboard/beranda')}
+          <Link
+            href="/dashboard/beranda"
             className="flex flex-col items-center gap-1 w-[25%] py-1"
           >
             <Home 
@@ -102,10 +103,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/beranda' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
               Beranda
             </span>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => router.push('/dashboard/laporan')}
+          <Link
+            href="/dashboard/laporan"
             className="flex flex-col items-center gap-1 w-[25%] py-1"
           >
             <PieChart 
@@ -116,11 +117,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/laporan' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
               Laporan
             </span>
-          </button>
+          </Link>
 
           <button
             onClick={() => setInputMenuOpen(true)}
-            className="flex flex-col items-center gap-1 w-[25%] py-1"
+            className="flex flex-col items-center gap-1 w-[25%] py-1 outline-none"
           >
             <PlusCircle 
               size={24} 
@@ -132,8 +133,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </span>
           </button>
 
-          <button
-            onClick={() => router.push('/dashboard/profil')}
+          <Link
+            href="/dashboard/profil"
             className="flex flex-col items-center gap-1 w-[25%] py-1"
           >
             <User 
@@ -144,7 +145,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className={`text-[10px] font-medium transition-colors ${pathname === '/dashboard/profil' ? 'text-[#0066cc]' : 'text-[#7a7a7a]'}`}>
               Profil
             </span>
-          </button>
+          </Link>
           
         </div>
       </div>
