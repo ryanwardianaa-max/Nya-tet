@@ -148,7 +148,11 @@ export default function BerandaPage() {
   const filteredData = getFilteredTransactions();
   const totalPemasukan = filteredData.filter(t => t.tipe === 'pemasukan').reduce((s, t) => s + Number(t.jumlah), 0);
   const totalPengeluaran = filteredData.filter(t => t.tipe === 'pengeluaran').reduce((s, t) => s + Number(t.jumlah), 0);
-  const saldo = totalPemasukan - totalPengeluaran;
+  
+  // Saldo selalu total keseluruhan
+  const globalPemasukan = transactions.filter(t => t.tipe === 'pemasukan').reduce((s, t) => s + Number(t.jumlah), 0);
+  const globalPengeluaran = transactions.filter(t => t.tipe === 'pengeluaran').reduce((s, t) => s + Number(t.jumlah), 0);
+  const globalSaldo = globalPemasukan - globalPengeluaran;
 
   const monthName = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(now);
 
@@ -212,7 +216,7 @@ export default function BerandaPage() {
 
       {/* Balance Card */}
       <BalanceCard
-        saldo={saldo}
+        saldo={globalSaldo}
         pemasukan={totalPemasukan}
         pengeluaran={totalPengeluaran}
         monthName={dateFilter === 'bulan' ? monthName : 'Periode Terpilih'}

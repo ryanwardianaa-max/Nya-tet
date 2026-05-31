@@ -44,7 +44,7 @@ export default function BalanceCard({
             <Wallet size={16} style={{ color: 'rgba(255,255,255,0.8)' }} />
           </div>
           <span className="type-caption" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            Total Saldo · {monthName}
+            Total Saldo Keseluruhan
           </span>
         </div>
 
@@ -68,7 +68,7 @@ export default function BalanceCard({
 
         {isNegative && (
           <p className="type-caption mb-4" style={{ color: '#FF6B6B' }}>
-            Pengeluaran melebihi pemasukan bulan ini
+            Pengeluaran melebihi total pemasukan
           </p>
         )}
 
