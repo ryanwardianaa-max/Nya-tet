@@ -49,15 +49,35 @@ export default function ScanModal({ onClose, onSaved }: ScanModalProps) {
     }
   };
 
+  const resizeImage = (img: HTMLImageElement | HTMLVideoElement): string => {
+    const canvas = document.createElement('canvas');
+    let width = img instanceof HTMLVideoElement ? img.videoWidth : img.width;
+    let height = img instanceof HTMLVideoElement ? img.videoHeight : img.height;
+    
+    // Maksimal resolusi 800px agar tidak terlalu berat untuk API
+    const MAX_DIMENSION = 800;
+    if (width > height && width > MAX_DIMENSION) {
+      height *= MAX_DIMENSION / width;
+      width = MAX_DIMENSION;
+    } else if (height > MAX_DIMENSION) {
+      width *= MAX_DIMENSION / height;
+      height = MAX_DIMENSION;
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(img, 0, 0, width, height);
+      return canvas.toDataURL('image/jpeg', 0.8);
+    }
+    return '';
+  };
+
   const takePhoto = () => {
     if (videoRef.current) {
-      const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        const base64 = canvas.toDataURL('image/jpeg');
+      const base64 = resizeImage(videoRef.current);
+      if (base64) {
         setPreview(base64);
         stopCamera();
         processImage(base64);
@@ -72,9 +92,13 @@ export default function ScanModal({ onClose, onSaved }: ScanModalProps) {
     }
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const base64 = e.target?.result as string;
-      setPreview(base64);
-      await processImage(base64);
+      const img = new Image();
+      img.onload = async () => {
+        const base64 = resizeImage(img);
+        setPreview(base64);
+        await processImage(base64);
+      };
+      img.src = e.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
