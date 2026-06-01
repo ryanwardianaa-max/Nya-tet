@@ -1,5 +1,5 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,58 +40,33 @@ Kembalikan HANYA JSON valid (tanpa markdown):
   "kategori": <salah satu kategori di atas>
 }`;
 
-    // Remove data URL prefix if present
     const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
     const mimeType = imageBase64.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const result = await model.generateContent([
+      prompt,
       {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Data,
-                },
-              },
-            ],
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 512,
-            responseMimeType: 'application/json',
-          },
-        }),
+        inlineData: {
+          data: base64Data,
+          mimeType: mimeType
+        }
       }
-    );
+    ]);
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('Gemini API Error:', errText);
-      
-      let debugMsg = 'Gagal menghubungi server AI.';
-      try {
-        const errJson = JSON.parse(errText);
-        debugMsg = errJson.error?.message || debugMsg;
-      } catch (e) {
-        debugMsg = errText;
-      }
+    const text = result.response.text().trim();
+    
+    // Ambil JSON dari response (hilangkan markdown jika ada)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON in response');
 
-      return NextResponse.json({ error: `AI Error: ${debugMsg}` }, { status: 500 });
-    }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(jsonMatch[0]);
 
     return NextResponse.json({ ...parsed, _source: 'gemini' });
-  } catch (err) {
+  } catch (err: any) {
     console.error('Scan AI error:', err);
-    return NextResponse.json({ error: 'Gagal memindai struk' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Gagal memindai struk' }, { status: 500 });
   }
 }
