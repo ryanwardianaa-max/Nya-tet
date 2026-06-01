@@ -15,7 +15,7 @@ export default function LaporanPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   
-  const [dateFilter, setDateFilter] = useState<DateFilter>('bulan');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('hari');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
 
@@ -80,7 +80,10 @@ export default function LaporanPage() {
   const filteredData = getFilteredTransactions();
   const totalPemasukan = filteredData.filter(t => t.tipe === 'pemasukan').reduce((s, t) => s + Number(t.jumlah), 0);
   const totalPengeluaran = filteredData.filter(t => t.tipe === 'pengeluaran').reduce((s, t) => s + Number(t.jumlah), 0);
-  const saldo = totalPemasukan - totalPengeluaran;
+  
+  const globalPemasukan = transactions.filter(t => t.tipe === 'pemasukan').reduce((s, t) => s + Number(t.jumlah), 0);
+  const globalPengeluaran = transactions.filter(t => t.tipe === 'pengeluaran').reduce((s, t) => s + Number(t.jumlah), 0);
+  const globalSaldo = globalPemasukan - globalPengeluaran;
 
   const categoryData = CATEGORIES
     .filter(c => c.id !== 'Pemasukan' && c.id !== 'Transfer')
@@ -157,7 +160,7 @@ Periode: ${periodeStr}
 💰 *Ringkasan:*
 Pemasukan  : ${formatRupiah(totalPemasukan)}
 Pengeluaran: ${formatRupiah(totalPengeluaran)}
-*Laba Bersih : ${formatRupiah(saldo)}*
+*Total Saldo Keseluruhan : ${formatRupiah(globalSaldo)}*
 
 📉 *Rincian Pengeluaran:*
 ${categoryText || '  (Belum ada pengeluaran)'}
@@ -233,9 +236,9 @@ _Dibuat otomatis oleh Nya-tet App_ 🚀`;
             <p className="text-[16px] font-semibold text-[#FF375F]">{formatRupiah(totalPengeluaran)}</p>
           </div>
           <div className="col-span-2 md:col-span-1 pt-4 md:pt-0 md:border-l md:border-[#f0f0f0] md:pl-4 mt-4 md:mt-0 border-t border-[#f0f0f0] md:border-t-0">
-            <p className="text-[12px] text-[#7a7a7a] mb-1">Laba Bersih</p>
-            <p className={`text-[20px] font-bold ${saldo >= 0 ? 'text-[#1d1d1f]' : 'text-[#FF375F]'}`}>
-              {formatRupiah(saldo)}
+            <p className="text-[12px] text-[#7a7a7a] mb-1">Total Saldo Keseluruhan</p>
+            <p className={`text-[20px] font-bold ${globalSaldo >= 0 ? 'text-[#1d1d1f]' : 'text-[#FF375F]'}`}>
+              {formatRupiah(globalSaldo)}
             </p>
           </div>
         </div>

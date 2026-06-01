@@ -15,7 +15,7 @@ export default function BerandaPage() {
   const [loading, setLoading] = useState(true);
   const [walletName, setWalletName] = useState<string>('Beranda');
   
-  const [dateFilter, setDateFilter] = useState<DateFilter>('bulan');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('hari');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   

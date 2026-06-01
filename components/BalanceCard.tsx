@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { formatRupiah } from '@/lib/types';
-import { Wallet } from 'lucide-react';
+import { Wallet, Eye, EyeOff } from 'lucide-react';
 
 interface BalanceCardProps {
   saldo: number;
@@ -15,6 +16,7 @@ export default function BalanceCard({
   saldo, pemasukan, pengeluaran, monthName, loading
 }: BalanceCardProps) {
   const isNegative = saldo < 0;
+  const [isHidden, setIsHidden] = useState(false);
 
   return (
     <div
@@ -37,15 +39,24 @@ export default function BalanceCard({
       />
 
       <div className="relative">
-        {/* Label */}
-        <div className="flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.1)' }}>
-            <Wallet size={16} style={{ color: 'rgba(255,255,255,0.8)' }} />
+        {/* Label and Toggle */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-[8px] flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <Wallet size={16} style={{ color: 'rgba(255,255,255,0.8)' }} />
+            </div>
+            <span className="type-caption" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Total Saldo Keseluruhan
+            </span>
           </div>
-          <span className="type-caption" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            Total Saldo Keseluruhan
-          </span>
+          <button 
+            onClick={() => setIsHidden(!isHidden)} 
+            className="p-2 rounded-full transition-all hover:bg-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.6)] hover:text-white"
+            title={isHidden ? "Tampilkan Saldo" : "Sembunyikan Saldo"}
+          >
+            {isHidden ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
         </div>
 
         {/* Main balance */}
@@ -58,11 +69,11 @@ export default function BalanceCard({
             style={{
               fontSize: '42px',
               lineHeight: '1.1',
-              color: isNegative ? '#FF6B6B' : '#ffffff',
+              color: isNegative && !isHidden ? '#FF6B6B' : '#ffffff',
               letterSpacing: '-0.03em',
             }}
           >
-            {formatRupiah(Math.abs(saldo))}
+            {isHidden ? 'Rp •••••••' : formatRupiah(Math.abs(saldo))}
           </h2>
         )}
 
