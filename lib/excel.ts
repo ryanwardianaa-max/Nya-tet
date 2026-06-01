@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { Transaction, formatRupiah } from './types';
 
-export const exportToExcel = async (transactions: Transaction[], monthName: string) => {
+export const exportToExcel = async (transactions: Transaction[], monthName: string, chartImage?: string) => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Laporan Keuangan');
 
@@ -104,6 +104,24 @@ export const exportToExcel = async (transactions: Transaction[], monthName: stri
   sheet.getColumn(4).width = 15;
   sheet.getColumn(5).width = 20;
   sheet.getColumn(6).width = 20;
+
+  // Add Chart Image
+  if (chartImage) {
+    // chartImage is a base64 string like "data:image/png;base64,..."
+    const base64Data = chartImage.split(',')[1];
+    if (base64Data) {
+      const imageId = workbook.addImage({
+        base64: chartImage,
+        extension: 'png',
+      });
+      
+      // Add image 2 rows below the end of the table
+      sheet.addImage(imageId, {
+        tl: { col: 1, row: endRow + 2 },
+        ext: { width: 600, height: 300 }
+      });
+    }
+  }
 
   // Export
   const buffer = await workbook.xlsx.writeBuffer();

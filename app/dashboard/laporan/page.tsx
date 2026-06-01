@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { Download, Calendar as CalendarIcon, Share2 } from 'lucide-react';
 
 const ExpenseChart = dynamic(() => import('@/components/ExpenseChart'), { ssr: false });
+const ExpensePieChart = dynamic(() => import('@/components/ExpensePieChart'), { ssr: false });
 
 type DateFilter = 'hari' | 'minggu' | 'bulan' | 'custom';
 
@@ -109,8 +110,16 @@ export default function LaporanPage() {
   const handleExportExcel = async () => {
     try {
       setExporting(true);
+      let chartImage = undefined;
+      const chartEl = document.getElementById('expense-chart-container');
+      if (chartEl) {
+        const html2canvas = (await import('html2canvas')).default;
+        const canvas = await html2canvas(chartEl, { scale: 2, backgroundColor: '#ffffff' });
+        chartImage = canvas.toDataURL('image/png');
+      }
+      
       const { exportToExcel } = await import('@/lib/excel');
-      await exportToExcel(filteredData, periodeStr);
+      await exportToExcel(filteredData, periodeStr, chartImage);
     } catch (err) {
       console.error(err);
       alert('Gagal mengekspor laporan Excel.');
@@ -244,10 +253,15 @@ _Dibuat otomatis oleh Nya-tet App_ 🚀`;
         </div>
       </div>
 
-      {/* Chart */}
+      {/* Charts */}
       {!loading && categoryData.length > 0 && (
-        <div id="expense-chart-container" className="mb-8 bg-white p-4 rounded-[24px] border border-[#e0e0e0]">
-          <ExpenseChart data={categoryData} monthName={periodeStr} />
+        <div id="expense-chart-container" className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="bg-white p-4 rounded-[24px] border border-[#e0e0e0]">
+            <ExpenseChart data={categoryData} monthName={periodeStr} />
+          </div>
+          <div className="bg-white p-4 rounded-[24px] border border-[#e0e0e0]">
+            <ExpensePieChart data={categoryData} monthName={periodeStr} />
+          </div>
         </div>
       )}
 
