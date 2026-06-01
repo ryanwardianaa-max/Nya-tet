@@ -19,10 +19,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [scanOpen, setScanOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [inputMenuOpen, setInputMenuOpen] = useState(false);
+  
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.replace('/');
+      } else {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, [router, supabase]);
 
   const handleTransactionSaved = (tx: Omit<Transaction, 'id' | 'user_id' | 'created_at'> & { created_at?: string }) => {
     window.dispatchEvent(new CustomEvent('transaction-added', { detail: tx }));
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f5f5f7' }}>
+        <div className="w-8 h-8 rounded-full border-4 border-[#0066cc] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#f5f5f7' }}>
