@@ -73,7 +73,16 @@ Kembalikan HANYA JSON valid (tanpa markdown):
     if (!response.ok) {
       const errText = await response.text();
       console.error('Gemini API Error:', errText);
-      return NextResponse.json({ error: 'Gagal menghubungi server AI. Kuota habis atau layanan sedang sibuk.' }, { status: 500 });
+      
+      let debugMsg = 'Gagal menghubungi server AI.';
+      try {
+        const errJson = JSON.parse(errText);
+        debugMsg = errJson.error?.message || debugMsg;
+      } catch (e) {
+        debugMsg = errText;
+      }
+
+      return NextResponse.json({ error: `AI Error: ${debugMsg}` }, { status: 500 });
     }
 
     const data = await response.json();
