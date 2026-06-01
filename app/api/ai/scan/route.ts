@@ -44,7 +44,7 @@ Kembalikan HANYA JSON valid (tanpa markdown):
     const mimeType = imageBase64.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const result = await model.generateContent([
       prompt,
