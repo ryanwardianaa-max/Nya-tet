@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const MOCK_SCAN_RESPONSE = {
-  jumlah: 89500,
-  toko: 'Indomaret',
-  tanggal: new Date().toISOString().split('T')[0],
-  keterangan: 'Belanja di Indomaret',
-  tipe: 'pengeluaran' as const,
-  kategori: 'Belanja',
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,13 +11,11 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // If no API key, use mock
+    // Cek API Key
     if (!apiKey || apiKey === 'your-gemini-api-key-here') {
-      return NextResponse.json({
-        ...MOCK_SCAN_RESPONSE,
-        _source: 'mock',
-        _note: 'Tambahkan GEMINI_API_KEY di .env.local untuk AI sungguhan',
-      });
+      return NextResponse.json({ 
+        error: 'Sistem AI belum dikonfigurasi (API Key hilang). Harap setel GEMINI_API_KEY di Vercel.' 
+      }, { status: 400 });
     }
 
     const prompt = `Kamu adalah akuntan ahli dan sistem OCR cerdas. Analisis gambar struk/nota ini dengan sangat teliti.
@@ -81,7 +71,9 @@ Kembalikan HANYA JSON valid (tanpa markdown):
     );
 
     if (!response.ok) {
-      return NextResponse.json({ ...MOCK_SCAN_RESPONSE, _source: 'mock_fallback' });
+      const errText = await response.text();
+      console.error('Gemini API Error:', errText);
+      return NextResponse.json({ error: 'Gagal menghubungi server AI. Kuota habis atau layanan sedang sibuk.' }, { status: 500 });
     }
 
     const data = await response.json();

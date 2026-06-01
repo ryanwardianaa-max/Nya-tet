@@ -97,8 +97,8 @@ export default function ScanModal({ onClose, onSaved }: ScanModalProps) {
         tipe: 'pengeluaran',
       });
       setState('confirm');
-    } catch {
-      setError('Gagal membaca struk. Coba foto lebih jelas.');
+    } catch (err: any) {
+      setError(err.message || 'Gagal membaca struk. Coba foto lebih jelas.');
       setState('idle');
     }
   };
