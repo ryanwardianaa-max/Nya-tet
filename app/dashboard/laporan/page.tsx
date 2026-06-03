@@ -9,7 +9,7 @@ import { Download, Calendar as CalendarIcon, Share2 } from 'lucide-react';
 const ExpenseChart = dynamic(() => import('@/components/ExpenseChart'), { ssr: false });
 const ExpensePieChart = dynamic(() => import('@/components/ExpensePieChart'), { ssr: false });
 
-type DateFilter = 'hari' | 'minggu' | 'bulan' | 'custom';
+type DateFilter = 'hari' | 'minggu' | 'bulan' | 'semua' | 'custom';
 
 export default function LaporanPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -57,6 +57,8 @@ export default function LaporanPage() {
         dateMatch = txDate >= weekAgo;
       } else if (dateFilter === 'bulan') {
         dateMatch = txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+      } else if (dateFilter === 'semua') {
+        dateMatch = true;
       } else if (dateFilter === 'custom') {
         if (customStartDate && customEndDate) {
           const start = new Date(customStartDate);
@@ -191,7 +193,7 @@ _Dibuat otomatis oleh Nya-tet App_ 🚀`;
 
       {/* Date Filter Pills */}
       <div className="flex flex-wrap items-center gap-2 mb-6">
-        {(['hari', 'minggu', 'bulan', 'custom'] as DateFilter[]).map(filter => (
+        {(['hari', 'minggu', 'bulan', 'semua', 'custom'] as DateFilter[]).map(filter => (
           <button
             key={filter}
             onClick={() => setDateFilter(filter)}

@@ -107,7 +107,6 @@ export default function ConfirmCard({ result, onChange, onSave, onRetry }: Confi
             type="date"
             value={result.tanggal || new Date().toISOString().split('T')[0]}
             max={new Date().toISOString().split('T')[0]}
-            min={new Date(new Date().setFullYear(new Date().getFullYear() - 2)).toISOString().split('T')[0]}
             onChange={e => onChange({ ...result, tanggal: e.target.value })}
             className="input-field"
           />

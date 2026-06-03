@@ -7,7 +7,7 @@ import BalanceCard from '@/components/BalanceCard';
 import TransactionList from '@/components/TransactionList';
 import { TrendingUp, TrendingDown, Calendar as CalendarIcon, Filter } from 'lucide-react';
 
-type DateFilter = 'hari' | 'minggu' | 'bulan' | 'custom';
+type DateFilter = 'hari' | 'minggu' | 'bulan' | 'semua' | 'custom';
 type TypeFilter = 'all' | 'pemasukan' | 'pengeluaran';
 
 export default function BerandaPage() {
@@ -120,6 +120,8 @@ export default function BerandaPage() {
         dateMatch = txDate >= weekAgo;
       } else if (dateFilter === 'bulan') {
         dateMatch = txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+      } else if (dateFilter === 'semua') {
+        dateMatch = true;
       } else if (dateFilter === 'custom') {
         if (customStartDate && customEndDate) {
           const start = new Date(customStartDate);
@@ -173,7 +175,7 @@ export default function BerandaPage() {
 
       {/* Date Filter Pills */}
       <div className="flex flex-wrap items-center gap-2 mb-6">
-        {(['hari', 'minggu', 'bulan', 'custom'] as DateFilter[]).map(filter => (
+        {(['hari', 'minggu', 'bulan', 'semua', 'custom'] as DateFilter[]).map(filter => (
           <button
             key={filter}
             onClick={() => setDateFilter(filter)}
