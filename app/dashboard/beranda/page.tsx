@@ -83,17 +83,23 @@ export default function BerandaPage() {
       
       const { data: { user } } = await supabase.auth.getUser();
       const insertData = user ? { ...detail, user_id: user.id } : { ...detail, user_id: '00000000-0000-0000-0000-000000000000' };
+      
+      // Hapus properti 'tanggal' karena tidak ada di skema database (menggunakan created_at)
+      if ('tanggal' in insertData) {
+        delete insertData.tanggal;
+      }
 
       const { data, error } = await supabase.from('transactions').insert([insertData] as any).select().single();
 
       if (!error && data) {
         setTransactions(prev => [data, ...prev]);
       } else {
+        console.error("Insert error:", error);
         const fake: Transaction = {
           id: Date.now().toString(),
           user_id: user?.id || 'demo',
-          ...detail,
-          created_at: new Date().toISOString(),
+          ...insertData,
+          created_at: insertData.created_at || new Date().toISOString(),
         };
         setTransactions(prev => [fake, ...prev]);
       }
