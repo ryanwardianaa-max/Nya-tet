@@ -20,6 +20,14 @@ export const metadata: Metadata = {
     description: 'Pencatatan keuangan otomatis dengan Voice & Vision AI.',
     type: 'website',
   },
+  // Aktifkan PWA agar bisa di-install dan loading lebih cepat
+  manifest: '/manifest.json',
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
+    'apple-mobile-web-app-title': 'Nya-tet',
+  },
 };
 
 export const viewport: Viewport = {

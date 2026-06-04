@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+/* Google Fonts CDN dihapus — font Inter dimuat via next/font (lebih cepat, tidak blok render) */
 
 @tailwind base;
 @tailwind components;
@@ -679,6 +679,23 @@ body {
 @keyframes wave {
   0%, 100% { transform: scaleY(0.4); }
   50%       { transform: scaleY(1.6); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s ease-out;
 }
 
 /* ═══════════════════════════════════════════════════════

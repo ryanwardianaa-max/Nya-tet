@@ -23,11 +23,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
+    // Gunakan session dari local storage terlebih dahulu (instan)
+    // lalu verifikasi ke server di background
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.replace('/');
-      } else {
+      try {
+        // getSession() sangat cepat karena baca local storage, bukan hit server
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.replace('/');
+        }
+      } finally {
         setIsCheckingAuth(false);
       }
     };
@@ -38,16 +43,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.dispatchEvent(new CustomEvent('transaction-added', { detail: tx }));
   };
 
-  if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f5f5f7' }}>
-        <div className="w-8 h-8 rounded-full border-4 border-[#0066cc] border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  // Tampilkan konten langsung (tidak blokir dengan spinner penuh)
+  // Hanya tampilkan shimmer tipis di atas halaman saat auth belum selesai
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#f5f5f7' }}>
+      {/* ── Loading bar tipis saat auth sedang dicek ── */}
+      {isCheckingAuth && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[100] h-[3px]"
+          style={{ background: 'linear-gradient(90deg, #0066cc, #30D158, #0066cc)', backgroundSize: '200% 100%', animation: 'shimmer 1.2s linear infinite' }}
+        />
+      )}
+
       {/* ── Main Content ── */}
       <main className="flex-1 pb-24">
         {children}
