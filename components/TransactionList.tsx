@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { Transaction, formatRupiah, formatDateShort, getCategoryInfo } from '@/lib/types';
-import { Mic, Camera, Pencil, Clock } from 'lucide-react';
+import { Mic, Camera, Pencil, Clock, Trash2, Edit3, ChevronRight } from 'lucide-react';
 
 interface TransactionListProps {
   transactions: Transaction[];
   loading?: boolean;
+  onEdit?: (tx: Transaction) => void;
+  onDelete?: (id: string) => void;
 }
 
 const SourceIcon = ({ source }: { source: string }) => {
@@ -39,7 +42,133 @@ function groupByDate(transactions: Transaction[]) {
   return groups;
 }
 
-export default function TransactionList({ transactions, loading }: TransactionListProps) {
+function TransactionRow({ tx, onEdit, onDelete }: {
+  tx: Transaction;
+  onEdit?: (tx: Transaction) => void;
+  onDelete?: (id: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const cat = getCategoryInfo(tx.kategori);
+  const hasActions = onEdit || onDelete;
+
+  const handleDelete = () => {
+    if (confirmDelete) {
+      onDelete?.(tx.id);
+    } else {
+      setConfirmDelete(true);
+      // Auto reset after 3 seconds if user doesn't confirm
+      setTimeout(() => setConfirmDelete(false), 3000);
+    }
+  };
+
+  return (
+    <div>
+      <div
+        className="flex items-center gap-4 py-3.5 group cursor-pointer transition-colors rounded-lg px-1 -mx-1"
+        style={{ borderBottom: expanded ? 'none' : undefined }}
+        onClick={() => hasActions && setExpanded(prev => !prev)}
+      >
+        {/* Category icon */}
+        <div
+          className="w-11 h-11 rounded-[11px] flex items-center justify-center text-xl flex-shrink-0"
+          style={{
+            background: `${cat.color}18`,
+            fontSize: '20px',
+          }}
+        >
+          {cat.emoji}
+        </div>
+
+        {/* Description */}
+        <div className="flex-1 min-w-0">
+          <p className="type-body-strong text-[#1d1d1f] truncate" style={{ fontSize: '15px' }}>
+            {tx.keterangan || tx.kategori}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="type-fine" style={{ color: '#7a7a7a' }}>
+              {tx.kategori}
+            </span>
+            <span className="type-fine" style={{ color: '#e0e0e0' }}>·</span>
+            <span
+              className="flex items-center gap-1 type-fine"
+              style={{ color: '#7a7a7a' }}
+              title={`Sumber: ${tx.source}`}
+            >
+              <SourceIcon source={tx.source} />
+            </span>
+          </div>
+        </div>
+
+        {/* Amount + chevron */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <p
+            className="type-body-strong"
+            style={{
+              color: tx.tipe === 'pemasukan' ? '#30D158' : '#1d1d1f',
+              fontSize: '15px',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {tx.tipe === 'pemasukan' ? '+' : '−'}{formatRupiah(tx.jumlah)}
+          </p>
+          {hasActions && (
+            <ChevronRight
+              size={14}
+              style={{
+                color: '#c0c0c0',
+                transform: expanded ? 'rotate(90deg)' : 'none',
+                transition: 'transform 0.2s ease',
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Action Row — slides in when expanded */}
+      {expanded && hasActions && (
+        <div
+          className="flex gap-2 pb-3 pt-1 px-1 animate-slide-up"
+        >
+          {onEdit && (
+            <button
+              onClick={e => { e.stopPropagation(); setExpanded(false); onEdit(tx); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all hover:scale-105 active:scale-95"
+              style={{
+                background: 'rgba(0,102,204,0.1)',
+                color: '#0066cc',
+              }}
+            >
+              <Edit3 size={12} /> Edit
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={e => { e.stopPropagation(); handleDelete(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all hover:scale-105 active:scale-95"
+              style={{
+                background: confirmDelete ? 'rgba(255,59,48,0.15)' : 'rgba(255,59,48,0.08)',
+                color: '#FF3B30',
+              }}
+            >
+              <Trash2 size={12} />
+              {confirmDelete ? 'Yakin hapus?' : 'Hapus'}
+            </button>
+          )}
+          <button
+            onClick={e => { e.stopPropagation(); setConfirmDelete(false); setExpanded(false); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold ml-auto transition-all"
+            style={{ background: '#f0f0f0', color: '#7a7a7a' }}
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function TransactionList({ transactions, loading, onEdit, onDelete }: TransactionListProps) {
   if (loading) {
     return (
       <div className="card-utility">
@@ -58,7 +187,7 @@ export default function TransactionList({ transactions, loading }: TransactionLi
         <div className="text-4xl mb-4">💸</div>
         <p className="type-body-strong text-[#1d1d1f] mb-2">Belum ada transaksi</p>
         <p className="type-caption" style={{ color: '#7a7a7a' }}>
-          Tekan tombol mikrofon di bawah untuk mencatat pengeluaran pertama Anda.
+          Tekan tombol + di bawah untuk mencatat transaksi pertama Anda.
         </p>
       </div>
     );
@@ -76,9 +205,19 @@ export default function TransactionList({ transactions, loading }: TransactionLi
           </div>
           <h3 className="type-body-strong text-[#1d1d1f]">Riwayat Transaksi</h3>
         </div>
-        <span className="type-caption" style={{ color: '#7a7a7a' }}>
-          {transactions.length} transaksi
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="type-caption" style={{ color: '#7a7a7a' }}>
+            {transactions.length} transaksi
+          </span>
+          {(onEdit || onDelete) && (
+            <span
+              className="type-fine px-2 py-0.5 rounded-full"
+              style={{ background: 'rgba(0,102,204,0.08)', color: '#0066cc', fontSize: '10px', fontWeight: 600 }}
+            >
+              Ketuk untuk opsi
+            </span>
+          )}
+        </div>
       </div>
 
       {Object.entries(groups).map(([dateLabel, txs]) => (
@@ -92,61 +231,13 @@ export default function TransactionList({ transactions, loading }: TransactionLi
 
           {/* Transactions in this date group */}
           {txs.map((tx, idx) => {
-            const cat = getCategoryInfo(tx.kategori);
             const isLast = idx === txs.length - 1;
-
             return (
               <div
                 key={tx.id}
-                className="flex items-center gap-4 py-3.5"
-                style={{
-                  borderBottom: isLast ? 'none' : `1px solid #f5f5f7`,
-                }}
+                style={{ borderBottom: isLast ? 'none' : '1px solid #f5f5f7' }}
               >
-                {/* Category icon */}
-                <div
-                  className="w-11 h-11 rounded-[11px] flex items-center justify-center text-xl flex-shrink-0"
-                  style={{
-                    background: `${cat.color}18`,
-                    fontSize: '20px',
-                  }}
-                >
-                  {cat.emoji}
-                </div>
-
-                {/* Description */}
-                <div className="flex-1 min-w-0">
-                  <p className="type-body-strong text-[#1d1d1f] truncate" style={{ fontSize: '15px' }}>
-                    {tx.keterangan || tx.kategori}
-                  </p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="type-fine" style={{ color: '#7a7a7a' }}>
-                      {tx.kategori}
-                    </span>
-                    <span className="type-fine" style={{ color: '#e0e0e0' }}>·</span>
-                    <span
-                      className="flex items-center gap-1 type-fine"
-                      style={{ color: '#7a7a7a' }}
-                      title={`Sumber: ${tx.source}`}
-                    >
-                      <SourceIcon source={tx.source} />
-                    </span>
-                  </div>
-                </div>
-
-                {/* Amount */}
-                <div className="text-right flex-shrink-0">
-                  <p
-                    className="type-body-strong"
-                    style={{
-                      color: tx.tipe === 'pemasukan' ? '#30D158' : '#1d1d1f',
-                      fontSize: '15px',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}
-                  >
-                    {tx.tipe === 'pemasukan' ? '+' : '−'}{formatRupiah(tx.jumlah)}
-                  </p>
-                </div>
+                <TransactionRow tx={tx} onEdit={onEdit} onDelete={onDelete} />
               </div>
             );
           })}

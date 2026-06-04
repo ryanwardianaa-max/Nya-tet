@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase';
 import { Transaction, formatRupiah } from '@/lib/types';
 import BalanceCard from '@/components/BalanceCard';
 import TransactionList from '@/components/TransactionList';
+import EditTransactionModal from '@/components/EditTransactionModal';
 import { TrendingUp, TrendingDown, Calendar as CalendarIcon, Filter } from 'lucide-react';
 
 type DateFilter = 'hari' | 'minggu' | 'bulan' | 'semua' | 'custom';
@@ -20,6 +21,7 @@ export default function BerandaPage() {
   const [customEndDate, setCustomEndDate] = useState('');
   
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
 
   const supabase = createClient();
 
@@ -108,6 +110,44 @@ export default function BerandaPage() {
     window.addEventListener('transaction-added', handleNewTx);
     return () => window.removeEventListener('transaction-added', handleNewTx);
   }, [supabase]);
+
+  // ── Edit Handler ──────────────────────────────────────
+  const handleEdit = async (updated: Transaction) => {
+    try {
+      const { error } = await supabase
+        .from('transactions')
+        .update({
+          jumlah: updated.jumlah,
+          tipe: updated.tipe,
+          kategori: updated.kategori,
+          keterangan: updated.keterangan,
+          created_at: updated.created_at,
+        })
+        .eq('id', updated.id);
+
+      if (!error) {
+        setTransactions(prev => prev.map(t => t.id === updated.id ? updated : t));
+      }
+    } catch (err) {
+      console.error('Error updating transaction:', err);
+    }
+  };
+
+  // ── Delete Handler ────────────────────────────────────
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id);
+
+      if (!error) {
+        setTransactions(prev => prev.filter(t => t.id !== id));
+      }
+    } catch (err) {
+      console.error('Error deleting transaction:', err);
+    }
+  };
 
   // ── Filter Logic ────────────────────────────────────
   const now = new Date();
@@ -274,7 +314,21 @@ export default function BerandaPage() {
       </div>
 
       {/* Transaction List */}
-      <TransactionList transactions={filteredData} loading={loading} />
+      <TransactionList
+        transactions={filteredData}
+        loading={loading}
+        onEdit={tx => setEditingTx(tx)}
+        onDelete={handleDelete}
+      />
+
+      {/* Edit Modal */}
+      {editingTx && (
+        <EditTransactionModal
+          transaction={editingTx}
+          onClose={() => setEditingTx(null)}
+          onSaved={updated => { handleEdit(updated); setEditingTx(null); }}
+        />
+      )}
     </div>
   );
 }
