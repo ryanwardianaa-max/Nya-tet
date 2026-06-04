@@ -43,6 +43,44 @@ export default function LaporanPage() {
     loadTransactions();
   }, [loadTransactions]);
 
+  // Realtime subscription — agar laporan selalu sinkron saat ada perubahan
+  useEffect(() => {
+    const channel = supabase
+      .channel('db-transactions-laporan')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'transactions' },
+        (payload) => {
+          setTransactions(prev => {
+            if (prev.find(t => t.id === (payload.new as any)?.id)) return prev;
+            return [payload.new as Transaction, ...prev];
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'transactions' },
+        (payload) => {
+          const deletedId = (payload.old as any)?.id;
+          if (deletedId) {
+            setTransactions(prev => prev.filter(t => t.id !== deletedId));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'transactions' },
+        (payload) => {
+          setTransactions(prev =>
+            prev.map(t => t.id === (payload.new as any)?.id ? payload.new as Transaction : t)
+          );
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [supabase]);
+
   const now = new Date();
   
   const getFilteredTransactions = () => {

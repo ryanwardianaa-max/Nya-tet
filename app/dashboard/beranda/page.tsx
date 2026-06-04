@@ -58,7 +58,7 @@ export default function BerandaPage() {
     loadTransactions();
   }, [loadTransactions]);
 
-  // Realtime subscription
+  // Realtime subscription — mendengarkan INSERT, UPDATE, dan DELETE
   useEffect(() => {
     const channel = supabase
       .channel('db-transactions')
@@ -70,6 +70,25 @@ export default function BerandaPage() {
             if (prev.find(t => t.id === payload.new.id)) return prev;
             return [payload.new as Transaction, ...prev];
           });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'transactions' },
+        (payload) => {
+          const deletedId = (payload.old as any)?.id;
+          if (deletedId) {
+            setTransactions(prev => prev.filter(t => t.id !== deletedId));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'transactions' },
+        (payload) => {
+          setTransactions(prev =>
+            prev.map(t => t.id === (payload.new as any)?.id ? payload.new as Transaction : t)
+          );
         }
       )
       .subscribe();
