@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Transaction, formatRupiah, formatDateShort, getCategoryInfo } from '@/lib/types';
-import { Mic, Camera, Pencil, Clock, Trash2, Edit3, ChevronRight } from 'lucide-react';
+import { Mic, Camera, Pencil, Clock, Trash2, Edit3, ChevronRight, Soup, ShoppingBag, Car, Gamepad2, Wallet, Pill, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -62,6 +62,38 @@ function TransactionRow({ tx, onEdit, onDelete }: {
     }
   };
 
+  const getCategoryStyle = (kategori: string, keterangan: string, isIncome: boolean) => {
+    const lowerDesc = (keterangan || '').toLowerCase();
+    const lowerCat = (kategori || '').toLowerCase();
+    
+    if (lowerDesc.includes('makan') || lowerDesc.includes('minum') || lowerCat.includes('makanan')) {
+      return { icon: <Soup color="#F87171" size={20} />, color: '#F87171' };
+    }
+    if (lowerDesc.includes('belanja') || lowerDesc.includes('baju') || lowerCat.includes('belanja')) {
+      return { icon: <ShoppingBag color="#38BDF8" size={20} />, color: '#38BDF8' };
+    }
+    if (lowerDesc.includes('transport') || lowerDesc.includes('ojek') || lowerCat.includes('transportasi')) {
+      return { icon: <Car color="#2DD4BF" size={20} />, color: '#2DD4BF' };
+    }
+    if (lowerDesc.includes('hiburan') || lowerDesc.includes('netflix') || lowerCat.includes('hiburan')) {
+      return { icon: <Gamepad2 color="#86EFAC" size={20} />, color: '#86EFAC' };
+    }
+    if (lowerDesc.includes('gaji') || lowerCat.includes('pemasukan')) {
+      return { icon: <Wallet color="#4ADE80" size={20} />, color: '#4ADE80' };
+    }
+    if (lowerDesc.includes('kesehatan') || lowerDesc.includes('obat') || lowerDesc.includes('vitamin') || lowerCat.includes('kesehatan')) {
+      return { icon: <Pill color="#F472B6" size={20} />, color: '#F472B6' };
+    }
+    
+    // Fallback
+    return isIncome 
+      ? { icon: <ArrowDownLeft color="#22C55E" size={20} />, color: '#22C55E' }
+      : { icon: <ArrowUpRight color="#EF4444" size={20} />, color: '#EF4444' };
+  };
+
+  const isIncome = tx.tipe === 'pemasukan';
+  const catStyle = getCategoryStyle(tx.kategori, tx.keterangan, isIncome);
+
   return (
     <div>
       <div
@@ -71,13 +103,12 @@ function TransactionRow({ tx, onEdit, onDelete }: {
       >
         {/* Category icon */}
         <div
-          className="w-11 h-11 rounded-[11px] flex items-center justify-center text-xl flex-shrink-0"
+          className="w-11 h-11 rounded-[11px] flex items-center justify-center flex-shrink-0"
           style={{
-            background: `${cat.color}18`,
-            fontSize: '20px',
+            background: `${catStyle.color}18`,
           }}
         >
-          {cat.emoji}
+          {catStyle.icon}
         </div>
 
         {/* Description */}
