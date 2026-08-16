@@ -1,6 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 const CATEGORIES = ['Makanan', 'Minuman', 'Transport', 'Belanja', 'Hiburan', 'Kesehatan', 'Tagihan', 'Transfer', 'Lainnya'];
 
 const OCR_PROMPT = `Kamu adalah akuntan ahli dan sistem OCR cerdas. Analisis gambar struk/nota ini dengan sangat teliti.
@@ -70,9 +73,9 @@ export async function POST(request: NextRequest) {
               },
             ],
             temperature: 0.1,
-            max_tokens: 600,
+            max_tokens: 2500,
           }),
-          signal: AbortSignal.timeout(25_000),
+          signal: AbortSignal.timeout(40_000),
         });
 
         if (res.ok) {
