@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         const baseUrl = (process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1').replace(/\/$/, '');
         const model = process.env.NVIDIA_MODEL || 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
-        const res = await fetch(`${baseUrl}/chat/completions`, {
+        const fetchNvidia = () => fetch(`${baseUrl}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -77,6 +77,20 @@ export async function POST(request: NextRequest) {
           }),
           signal: AbortSignal.timeout(40_000),
         });
+
+        let res: Response;
+        let retried = false;
+        try {
+          res = await fetchNvidia();
+        } catch {
+          retried = true;
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          res = await fetchNvidia();
+        }
+        if (!retried && (res.status === 429 || res.status >= 500)) {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          res = await fetchNvidia();
+        }
 
         if (res.ok) {
           const data = await res.json() as {

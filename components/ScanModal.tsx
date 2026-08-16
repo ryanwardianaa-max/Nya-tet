@@ -54,8 +54,8 @@ export default function ScanModal({ onClose, onSaved }: ScanModalProps) {
     let width = img instanceof HTMLVideoElement ? img.videoWidth : img.width;
     let height = img instanceof HTMLVideoElement ? img.videoHeight : img.height;
     
-    // Maksimal resolusi 800px agar tidak terlalu berat untuk API
-    const MAX_DIMENSION = 800;
+    // Maksimal resolusi 1200px untuk menjaga keterbacaan OCR tanpa payload kamera penuh
+    const MAX_DIMENSION = 1200;
     if (width > height && width > MAX_DIMENSION) {
       height *= MAX_DIMENSION / width;
       width = MAX_DIMENSION;
