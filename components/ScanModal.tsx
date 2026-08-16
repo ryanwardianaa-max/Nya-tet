@@ -119,6 +119,9 @@ export default function ScanModal({ onClose, onSaved }: ScanModalProps) {
         kategori: data.kategori,
         keterangan: data.keterangan || data.toko || 'Pembelian',
         tipe: 'pengeluaran',
+        tanggal: data.tanggal && !isNaN(new Date(data.tanggal).getTime()) 
+          ? data.tanggal 
+          : new Date().toISOString().split('T')[0],
       });
       setState('confirm');
     } catch (err: any) {
@@ -129,10 +132,18 @@ export default function ScanModal({ onClose, onSaved }: ScanModalProps) {
 
   const handleSave = () => {
     if (!result) return;
+    const now = new Date();
+    let txDate = new Date();
+    if (result.tanggal) {
+      const parts = result.tanggal.split('-').map(Number);
+      if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
+        txDate = new Date(parts[0], parts[1] - 1, parts[2], now.getHours(), now.getMinutes(), now.getSeconds());
+      }
+    }
     onSaved({ 
       ...result, 
       source: 'scan',
-      created_at: result.tanggal ? new Date(result.tanggal).toISOString() : new Date().toISOString()
+      created_at: txDate.toISOString()
     });
     setState('saved');
     setTimeout(handleClose, 1000);

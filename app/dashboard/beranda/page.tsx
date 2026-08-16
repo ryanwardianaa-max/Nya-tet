@@ -114,6 +114,11 @@ export default function BerandaPage() {
 
       if (!error && data) {
         setTransactions(prev => [data, ...prev]);
+        const txDate = new Date(data.created_at);
+        const today = new Date();
+        if (txDate.toDateString() !== today.toDateString()) {
+          setDateFilter('semua');
+        }
       } else {
         console.error("Insert error:", error);
         const fake: Transaction = {
@@ -123,6 +128,11 @@ export default function BerandaPage() {
           created_at: insertData.created_at || new Date().toISOString(),
         };
         setTransactions(prev => [fake, ...prev]);
+        const txDate = new Date(fake.created_at);
+        const today = new Date();
+        if (txDate.toDateString() !== today.toDateString()) {
+          setDateFilter('semua');
+        }
       }
     };
 
