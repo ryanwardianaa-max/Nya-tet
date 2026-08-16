@@ -2,71 +2,104 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const CATEGORIES = ['Makanan', 'Minuman', 'Transport', 'Belanja', 'Hiburan', 'Kesehatan', 'Tagihan', 'Pemasukan', 'Transfer', 'Lainnya'];
+const SYSTEM_PROMPT = `Ekstrak transaksi keuangan dari teks bahasa Indonesia menjadi JSON murni tanpa markdown:
+{
+  "jumlah": <angka integer bulat>,
+  "tipe": <"pemasukan" atau "pengeluaran">,
+  "kategori": <"Makanan" | "Minuman" | "Transport" | "Belanja" | "Hiburan" | "Kesehatan" | "Tagihan" | "Pemasukan" | "Transfer" | "Lainnya">,
+  "keterangan": <string ringkas>
+}
+Konversi nominal seperti "45 ribu" menjadi 45000. Hilangkan nominal dari keterangan.`;
 
 export async function POST(req: NextRequest) {
-  const { transcript } = await req.json();
-  if (!transcript?.trim()) {
+  let transcript: string;
+
+  try {
+    const body: unknown = await req.json();
+    transcript = typeof body === 'object' && body !== null && 'transcript' in body
+      ? String((body as { transcript?: unknown }).transcript ?? '').trim()
+      : '';
+  } catch {
+    return NextResponse.json({ error: 'Body JSON tidak valid' }, { status: 400 });
+  }
+
+  if (!transcript) {
     return NextResponse.json({ error: 'Transkripsi kosong' }, { status: 400 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
-
-  // ── Gunakan Gemini real jika ada key ──
-  if (apiKey) {
+  const xkiroKey = process.env.XKIRO_API_KEY?.trim();
+  if (xkiroKey) {
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const prompt = `Ekstrak informasi transaksi keuangan dari teks berikut dalam Bahasa Indonesia.
-
-Teks: "${transcript}"
-
-Jawab dalam JSON dengan format PERSIS seperti ini (tidak ada teks lain):
-{
-  "jumlah": <angka bulat murni, misal: 25000. JANGAN gunakan titik/koma/simbol/huruf>,
-  "tipe": "<"pemasukan" atau "pengeluaran">,
-  "kategori": "<salah satu dari: ${CATEGORIES.join(', ')}>",
-  "keterangan": "<deskripsi singkat>"
-}
-
-Aturan:
-- WAJIB konversi kata menjadi angka nol penuh (misal: "25 ribu" -> 25000, "1 setengah juta" -> 1500000)
-- Hilangkan teks harga pada keterangan (misal "Beli kopi rp25.000" -> keterangan: "Beli kopi")
-- Jika menyebut "beli", "bayar", "makan", "minum" -> tipe = pengeluaran
-- Jika menyebut "gaji", "terima", "dapat", "pemasukan" -> tipe = pemasukan`;
-
-      const result = await model.generateContent(prompt);
-      const text = result.response.text().trim();
-
-      // Ambil JSON dari response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON in response');
-
-      const parsed = JSON.parse(jsonMatch[0]);
-
-      return NextResponse.json({
-        jumlah: Math.abs(parseInt(String(parsed.jumlah).replace(/\D/g, ''), 10)) || 0,
-        tipe: parsed.tipe === 'pemasukan' ? 'pemasukan' : 'pengeluaran',
-        kategori: CATEGORIES.includes(parsed.kategori) ? parsed.kategori : 'Lainnya',
-        keterangan: String(parsed.keterangan || transcript.slice(0, 50)),
+      const baseUrl = (process.env.XKIRO_BASE_URL || 'https://api.xkiro.com/v1').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${xkiroKey}`,
+        },
+        body: JSON.stringify({
+          model: process.env.XKIRO_MODEL || 'deepseek/deepseek-v4-pro',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: transcript },
+          ],
+          temperature: 0.1,
+        }),
+        signal: AbortSignal.timeout(15_000),
       });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json() as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) throw new Error('Respons Xkiro kosong');
+
+      return NextResponse.json(parseAIResponse(content, transcript));
     } catch (err) {
-      console.error('Gemini error:', err);
-      // Fallback ke parsing manual
+      console.error('Xkiro error:', err);
     }
   }
 
-  // ── Fallback: parsing manual ──
+  const geminiKey = process.env.GEMINI_API_KEY?.trim();
+  if (geminiKey) {
+    try {
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const result = await model.generateContent(`${SYSTEM_PROMPT}\n\nTeks: ${transcript}`);
+      return NextResponse.json(parseAIResponse(result.response.text(), transcript));
+    } catch (err) {
+      console.error('Gemini error:', err);
+    }
+  }
+
   return NextResponse.json(parseManual(transcript));
+}
+
+function parseAIResponse(text: string, transcript: string) {
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Respons AI tidak memuat JSON');
+
+  const parsed = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+  const rawAmount = String(parsed.jumlah ?? '').replace(/[^\d]/g, '');
+
+  return {
+    jumlah: Math.abs(Number.parseInt(rawAmount, 10)) || 0,
+    tipe: parsed.tipe === 'pemasukan' ? 'pemasukan' : 'pengeluaran',
+    kategori: typeof parsed.kategori === 'string' && CATEGORIES.includes(parsed.kategori)
+      ? parsed.kategori
+      : 'Lainnya',
+    keterangan: typeof parsed.keterangan === 'string' && parsed.keterangan.trim()
+      ? parsed.keterangan.trim().slice(0, 100)
+      : transcript.slice(0, 100),
+  };
 }
 
 function parseManual(text: string) {
   const lower = text.toLowerCase();
-
-  // Bersihkan titik (.) jika dipakai sebagai pemisah ribuan (misal: 25.000 -> 25000)
   const cleanedText = lower.replace(/rp/g, '').replace(/\./g, '');
-  
-  // Ekstrak angka
+
   let jumlah = 0;
   const patterns = [
     { re: /(\d+(?:,\d+)?)\s*juta/, mult: 1_000_000 },
@@ -74,24 +107,22 @@ function parseManual(text: string) {
     { re: /(\d+(?:,\d+)?)\s*ribu/, mult: 1_000 },
     { re: /(\d+(?:,\d+)?)\s*rb/, mult: 1_000 },
     { re: /(\d{4,})/, mult: 1 },
-    { re: /(\d+)/, mult: 1000 }, // asumsi jika cuma "25" maksudnya "25000" dalam konteks uang
+    { re: /(\d+)/, mult: 1000 },
   ];
-  
+
   for (const { re, mult } of patterns) {
-    const m = cleanedText.match(re);
-    if (m) {
-      jumlah = Math.round(parseFloat(m[1].replace(',', '.')) * mult);
-      if (jumlah >= 1000) break; // Hanya ambil yang masuk akal
+    const match = cleanedText.match(re);
+    if (match) {
+      jumlah = Math.round(Number.parseFloat(match[1].replace(',', '.')) * mult);
+      if (jumlah >= 1000) break;
     }
   }
 
-  // Tipe
   const isIncome = /gaji|terima|dapat|masuk|pemasukan|penghasilan|transfer masuk/.test(lower);
   const tipe: 'pemasukan' | 'pengeluaran' = isIncome ? 'pemasukan' : 'pengeluaran';
 
-  // Kategori
   let kategori = 'Lainnya';
-  if (/makan|minum|kopi|nasi|bakso|mie|warung|restoran|café/.test(lower)) kategori = 'Makanan';
+  if (/makan|minum|kopi|nasi|bakso|mie|warung|warteg|restoran|café/.test(lower)) kategori = 'Makanan';
   else if (/bensin|grab|ojek|gojek|taxi|angkot|parkir|tol|bus|kereta/.test(lower)) kategori = 'Transport';
   else if (/belanja|beli|toko|mall|supermarket|shopee|tokopedia/.test(lower)) kategori = 'Belanja';
   else if (/listrik|air|internet|pulsa|tagihan|iuran/.test(lower)) kategori = 'Tagihan';
@@ -103,6 +134,6 @@ function parseManual(text: string) {
     jumlah,
     tipe,
     kategori,
-    keterangan: text.length > 50 ? text.slice(0, 50) + '...' : text,
+    keterangan: text.length > 50 ? `${text.slice(0, 50)}...` : text,
   };
 }
