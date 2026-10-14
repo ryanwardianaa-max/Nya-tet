@@ -2,21 +2,38 @@
   "name": "Nya-tet - Catat Keuangan Pintar",
   "short_name": "Nya-tet",
   "description": "Catat keuangan secepat bicara dengan AI",
+  "id": "/",
   "start_url": "/dashboard/beranda",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f5f5f7",
   "theme_color": "#ffffff",
   "orientation": "portrait",
+  "categories": ["finance", "productivity"],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
